@@ -1,1 +1,722 @@
-<h1>test</h1>
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1916">
+<title>Wörter Lernen</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg: #0f0e0c;
+–surface: #1a1916;
+–surface2: #242220;
+–border: #2e2c28;
+–gold: #c9a84c;
+–gold-dim: #7a6330;
+–text: #e8e4da;
+–muted: #7a7568;
+–green: #5a9e6f;
+–blue: #4a7fa5;
+–red: #c0513a;
+}
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: Tahoma, ‘Segoe UI’, sans-serif;
+min-height: 100vh;
+direction: rtl;
+padding-bottom: 70px;
+}
+
+/* ── HEADER ── */
+.header {
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+padding: 14px 16px 12px;
+position: sticky;
+top: 0;
+z-index: 10;
+}
+.header-title {
+font-family: Georgia, serif;
+font-size: 1.35rem;
+color: var(–gold);
+text-align: center;
+direction: ltr;
+margin-bottom: 10px;
+}
+.search-row { display: flex; gap: 8px; }
+.search-input {
+flex: 1;
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 8px;
+color: var(–text);
+font-size: 0.9rem;
+padding: 8px 12px;
+outline: none;
+direction: rtl;
+font-family: Tahoma, sans-serif;
+}
+.filter-select {
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 8px;
+color: var(–muted);
+font-size: 0.78rem;
+padding: 0 8px;
+outline: none;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+}
+
+/* ── WORD LIST ── */
+.list-container { padding: 12px 14px; }
+.list-info {
+font-size: 0.68rem;
+color: var(–muted);
+font-family: monospace;
+margin-bottom: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.backup-btn {
+background: var(–surface2);
+border: 1px solid var(–border);
+color: var(–muted);
+padding: 3px 10px;
+border-radius: 6px;
+font-size: 0.65rem;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+}
+.backup-btn:hover { color: var(–gold); border-color: var(–gold-dim); }
+
+.word-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+margin-bottom: 8px;
+overflow: hidden;
+cursor: pointer;
+transition: border-color 0.2s;
+}
+.word-card.open { border-color: var(–gold-dim); }
+.word-card-header {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 12px 14px;
+}
+.word-text {
+font-family: Georgia, serif;
+font-size: 1rem;
+color: var(–gold);
+direction: ltr;
+flex: 1;
+}
+.speak-btn {
+background: none;
+border: none;
+cursor: pointer;
+font-size: 1rem;
+padding: 2px 4px;
+border-radius: 4px;
+transition: background 0.15s;
+line-height: 1;
+}
+.speak-btn:hover { background: var(–surface2); }
+.type-badge {
+font-size: 0.62rem;
+padding: 2px 8px;
+border-radius: 10px;
+font-family: monospace;
+direction: ltr;
+}
+.my-badge {
+font-size: 0.58rem;
+color: var(–muted);
+background: var(–surface2);
+padding: 1px 6px;
+border-radius: 6px;
+}
+.arrow { color: var(–muted); font-size: 0.65rem; }
+.word-card-body {
+display: none;
+padding: 0 14px 14px;
+border-top: 1px solid var(–border);
+}
+.word-card.open .word-card-body { display: block; }
+.meaning-text {
+margin-top: 10px;
+font-size: 1rem;
+font-weight: 600;
+color: var(–text);
+line-height: 1.6;
+}
+.example-de {
+margin-top: 10px;
+font-family: monospace;
+font-size: 0.82rem;
+color: #b8d4a8;
+background: rgba(90,158,111,0.08);
+border-right: 3px solid var(–green);
+padding: 8px 12px;
+border-radius: 4px;
+direction: ltr;
+text-align: left;
+line-height: 1.6;
+}
+.example-fa {
+margin-top: 6px;
+font-size: 0.78rem;
+color: var(–muted);
+line-height: 1.6;
+}
+.grammar-box {
+margin-top: 10px;
+font-size: 0.72rem;
+color: var(–blue);
+background: rgba(74,127,165,0.08);
+border: 1px solid rgba(74,127,165,0.2);
+border-radius: 6px;
+padding: 8px 10px;
+direction: ltr;
+text-align: left;
+font-family: monospace;
+line-height: 1.6;
+}
+.delete-btn {
+margin-top: 12px;
+background: rgba(192,81,58,0.1);
+border: 1px solid rgba(192,81,58,0.3);
+color: #e08070;
+padding: 5px 14px;
+border-radius: 6px;
+font-size: 0.76rem;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+}
+.empty-msg {
+text-align: center;
+color: var(–muted);
+padding: 40px;
+font-size: 0.88rem;
+}
+
+/* ── ADD FORM ── */
+.add-container { padding: 20px 16px; }
+.add-title {
+font-size: 0.72rem;
+color: var(–gold);
+font-family: monospace;
+margin-bottom: 18px;
+letter-spacing: 1px;
+}
+.field-label {
+font-size: 0.68rem;
+color: var(–muted);
+margin-bottom: 5px;
+font-family: monospace;
+}
+.field-group { margin-bottom: 14px; }
+.field-input {
+width: 100%;
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 8px;
+color: var(–text);
+font-size: 0.92rem;
+padding: 11px 12px;
+outline: none;
+font-family: Tahoma, sans-serif;
+}
+.field-input.ltr { direction: ltr; }
+.field-input.rtl { direction: rtl; }
+.type-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.type-btn {
+background: var(–surface2);
+border: 1px solid var(–border);
+color: var(–muted);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.78rem;
+cursor: pointer;
+font-family: monospace;
+direction: ltr;
+transition: all 0.15s;
+}
+.save-btn {
+width: 100%;
+background: var(–gold);
+color: #0f0e0c;
+border: none;
+border-radius: 10px;
+padding: 14px;
+font-weight: 700;
+font-size: 1rem;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+margin-top: 4px;
+transition: background 0.3s;
+}
+.save-btn.success { background: var(–green); }
+
+/* ── QUIZ ── */
+.quiz-container { padding: 20px 16px; }
+.quiz-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 28px 20px;
+text-align: center;
+margin-bottom: 16px;
+}
+.quiz-word {
+font-family: Georgia, serif;
+font-size: 2rem;
+color: var(–gold);
+direction: ltr;
+margin-bottom: 8px;
+}
+.quiz-type {
+font-size: 0.72rem;
+color: var(–muted);
+font-family: monospace;
+direction: ltr;
+margin-bottom: 20px;
+}
+.quiz-speak-btn {
+background: var(–surface2);
+border: 1px solid var(–border);
+color: var(–muted);
+padding: 8px 18px;
+border-radius: 20px;
+font-size: 0.85rem;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+}
+.quiz-answer-box {
+margin-top: 20px;
+display: none;
+}
+.quiz-answer-box.show { display: block; }
+.quiz-meaning {
+font-size: 1.2rem;
+font-weight: 700;
+color: var(–text);
+margin-bottom: 10px;
+}
+.quiz-example {
+font-family: monospace;
+font-size: 0.82rem;
+color: #b8d4a8;
+background: rgba(90,158,111,0.08);
+border-right: 3px solid var(–green);
+padding: 8px 12px;
+border-radius: 4px;
+direction: ltr;
+text-align: left;
+line-height: 1.6;
+}
+.quiz-btns { display: flex; gap: 10px; margin-top: 16px; }
+.quiz-btn {
+flex: 1;
+border: none;
+border-radius: 10px;
+padding: 13px;
+font-size: 0.9rem;
+font-weight: 700;
+cursor: pointer;
+font-family: Tahoma, sans-serif;
+transition: opacity 0.15s;
+}
+.quiz-btn:active { opacity: 0.8; }
+.quiz-btn.show-btn { background: var(–gold); color: #0f0e0c; }
+.quiz-btn.next-btn { background: var(–surface2); color: var(–text); border: 1px solid var(–border); }
+.quiz-btn.know-btn { background: var(–green); color: #fff; }
+.quiz-btn.skip-btn { background: var(–surface2); color: var(–muted); border: 1px solid var(–border); }
+.quiz-progress {
+font-size: 0.72rem;
+color: var(–muted);
+font-family: monospace;
+text-align: center;
+margin-bottom: 14px;
+}
+.quiz-score {
+display: flex;
+gap: 10px;
+margin-bottom: 16px;
+}
+.score-box {
+flex: 1;
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 10px;
+text-align: center;
+}
+.score-num { font-size: 1.4rem; font-weight: 700; }
+.score-lbl { font-size: 0.65rem; color: var(–muted); margin-top: 2px; }
+.score-know { color: var(–green); }
+.score-skip { color: #e08070; }
+.quiz-empty {
+text-align: center;
+color: var(–muted);
+padding: 40px 20px;
+font-size: 0.88rem;
+line-height: 1.8;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: var(–surface);
+border-top: 1px solid var(–border);
+display: flex;
+}
+.nav-btn {
+flex: 1;
+background: none;
+border: none;
+padding: 10px 0 8px;
+cursor: pointer;
+color: var(–muted);
+font-size: 0.7rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 2px;
+font-family: Tahoma, sans-serif;
+transition: color 0.2s;
+}
+.nav-btn.active { color: var(–gold); }
+.nav-icon { font-size: 1.1rem; }
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<div class="header">
+  <div class="header-title">Wörter Lernen</div>
+  <div class="search-row" id="searchRow">
+    <input class="search-input" id="searchInput" placeholder="🔍 جستجو..." oninput="renderList()">
+    <select class="filter-select" id="filterType" onchange="renderList()">
+      <option>همه</option>
+      <option>Nomen</option>
+      <option>Verb</option>
+      <option>Adjektiv</option>
+      <option>Adverb</option>
+      <option>Andere</option>
+    </select>
+  </div>
+</div>
+
+<!-- TAB: LIST -->
+
+<div id="tab-list">
+  <div class="list-container">
+    <div class="list-info">
+      <span id="listInfo"></span>
+      <button class="backup-btn" onclick="downloadBackup()">💾 پشتیبان‌گیری</button>
+    </div>
+    <div id="wordList"></div>
+  </div>
+</div>
+
+<!-- TAB: ADD -->
+
+<div id="tab-add" style="display:none">
+  <div class="add-container">
+    <div class="add-title">+ کلمه جدید اضافه کن</div>
+    <div class="field-group">
+      <div class="field-label">کلمه آلمانی *</div>
+      <input class="field-input ltr" id="f-word" placeholder="z.B. der Hund">
+    </div>
+    <div class="field-group">
+      <div class="field-label">معنی فارسی *</div>
+      <input class="field-input rtl" id="f-meaning" placeholder="سگ">
+    </div>
+    <div class="field-group">
+      <div class="field-label">مثال آلمانی</div>
+      <input class="field-input ltr" id="f-example-de" placeholder="Der Hund ist groß.">
+    </div>
+    <div class="field-group">
+      <div class="field-label">ترجمه مثال</div>
+      <input class="field-input rtl" id="f-example-fa" placeholder="سگ بزرگ است.">
+    </div>
+    <div class="field-group">
+      <div class="field-label">گرامر</div>
+      <input class="field-input ltr" id="f-grammar" placeholder="Plural: die Hunde | Genitiv: des Hundes">
+    </div>
+    <div class="field-group">
+      <div class="field-label">نوع کلمه</div>
+      <div class="type-buttons" id="typeButtons"></div>
+    </div>
+    <button class="save-btn" id="saveBtn" onclick="addWord()">ذخیره کلمه</button>
+  </div>
+</div>
+
+<!-- TAB: QUIZ -->
+
+<div id="tab-quiz" style="display:none">
+  <div class="quiz-container">
+    <div class="quiz-score">
+      <div class="score-box"><div class="score-num score-know" id="scoreKnow">0</div><div class="score-lbl">بلدم ✓</div></div>
+      <div class="score-box"><div class="score-num score-skip" id="scoreSkip">0</div><div class="score-lbl">رد کردم ✗</div></div>
+      <div class="score-box"><div class="score-num" id="scoreLeft" style="color:var(--muted)">0</div><div class="score-lbl">مانده</div></div>
+    </div>
+    <div id="quizContent"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-list" onclick="switchTab('list')">
+    <span class="nav-icon">📚</span><span>کلمات</span>
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="switchTab('add')">
+    <span class="nav-icon">＋</span><span>اضافه</span>
+  </button>
+  <button class="nav-btn" id="nav-quiz" onclick="switchTab('quiz')">
+    <span class="nav-icon">🎯</span><span>تمرین</span>
+  </button>
+</div>
+
+<script>
+// ── BUILT-IN DATA ─────────────────────────────────────
+const BUILTIN = [
+  { id:1,  word:"die Bildung",       type:"Nomen",    meaning:"آموزش، تحصیل",             example_de:"Bildung ist der Schlüssel zum Erfolg.",          example_fa:"آموزش کلید موفقیت است.",              grammar:"Plural: die Bildungen | Genitiv: der Bildung", builtin:true },
+  { id:2,  word:"der Beruf",         type:"Nomen",    meaning:"شغل، حرفه",                example_de:"Was ist dein Beruf?",                            example_fa:"شغلت چیست؟",                          grammar:"Plural: die Berufe | Genitiv: des Berufs", builtin:true },
+  { id:3,  word:"die Erfahrung",     type:"Nomen",    meaning:"تجربه",                    example_de:"Sie hat viel Erfahrung im Bereich IT.",           example_fa:"او تجربه زیادی در IT دارد.",          grammar:"Plural: die Erfahrungen | Genitiv: der Erfahrung", builtin:true },
+  { id:4,  word:"entwickeln",        type:"Verb",     meaning:"توسعه دادن، گسترش دادن",  example_de:"Wir entwickeln eine neue App.",                  example_fa:"ما یک اپ جدید توسعه می‌دهیم.",        grammar:"ich entwickle | Perfekt: hat entwickelt | untrennbar", builtin:true },
+  { id:5,  word:"verantwortlich",    type:"Adjektiv", meaning:"مسئول",                    example_de:"Sie ist verantwortlich für das Projekt.",         example_fa:"او مسئول پروژه است.",                 grammar:"Komparativ: verantwortlicher | Superlativ: am verantwortlichsten", builtin:true },
+  { id:6,  word:"die Bewerbung",     type:"Nomen",    meaning:"درخواست کار",              example_de:"Ich habe eine Bewerbung geschrieben.",            example_fa:"من یک درخواست کار نوشتم.",            grammar:"Plural: die Bewerbungen | Genitiv: der Bewerbung", builtin:true },
+  { id:7,  word:"die Ausbildung",    type:"Nomen",    meaning:"آموزش حرفه‌ای",           example_de:"Sie macht eine Ausbildung zur IT-Systemkauffrau.",example_fa:"او آموزش IT-Systemkauffrau می‌گذراند.",grammar:"Plural: die Ausbildungen | Genitiv: der Ausbildung", builtin:true },
+  { id:8,  word:"bewerben (sich)",   type:"Verb",     meaning:"درخواست دادن برای کار",   example_de:"Ich bewerbe mich um diese Stelle.",              example_fa:"برای این جایگاه درخواست می‌دهم.",     grammar:"ich bewerbe mich | Perfekt: hat sich beworben | Rektion: um + Akk", builtin:true },
+  { id:9,  word:"die Fähigkeit",     type:"Nomen",    meaning:"توانایی، مهارت",          example_de:"Sie hat die Fähigkeit, gut zu kommunizieren.",   example_fa:"او توانایی ارتباط خوب دارد.",         grammar:"Plural: die Fähigkeiten | Genitiv: der Fähigkeit", builtin:true },
+  { id:10, word:"zuverlässig",       type:"Adjektiv", meaning:"قابل اعتماد",             example_de:"Ein zuverlässiger Mitarbeiter kommt pünktlich.", example_fa:"کارمند قابل اعتماد سر وقت می‌آید.",  grammar:"Komparativ: zuverlässiger | Superlativ: am zuverlässigsten", builtin:true },
+  { id:11, word:"die Förderung",     type:"Nomen",    meaning:"کمک مالی، حمایت",        example_de:"Die Agentur für Arbeit bietet Förderung an.",    example_fa:"اداره کار کمک مالی ارائه می‌دهد.",   grammar:"Plural: die Förderungen | Genitiv: der Förderung", builtin:true },
+  { id:12, word:"selbstständig",     type:"Adjektiv", meaning:"مستقل",                   example_de:"Er arbeitet selbstständig.",                     example_fa:"او مستقل کار می‌کند.",                grammar:"Komparativ: selbstständiger | Superlativ: am selbstständigsten", builtin:true },
+  { id:13, word:"anmelden (sich)",   type:"Verb",     meaning:"ثبت‌نام کردن",            example_de:"Ich melde mich beim Amt an.",                    example_fa:"در اداره ثبت‌نام می‌کنم.",            grammar:"ich melde mich an | Perfekt: hat sich angemeldet | trennbar", builtin:true },
+  { id:14, word:"das Gespräch",      type:"Nomen",    meaning:"مکالمه، گفتگو",           example_de:"Das Gespräch war sehr hilfreich.",               example_fa:"گفتگو بسیار مفید بود.",               grammar:"Plural: die Gespräche | Genitiv: des Gesprächs", builtin:true },
+  { id:15, word:"erledigen",         type:"Verb",     meaning:"انجام دادن، تمام کردن",  example_de:"Ich erledige die Aufgaben bis Freitag.",         example_fa:"وظایف را تا جمعه انجام می‌دهم.",      grammar:"ich erledige | Perfekt: hat erledigt | untrennbar", builtin:true },
+  { id:16, word:"überweisen",        type:"Verb",     meaning:"واریز کردن",              example_de:"Ich überweise das Geld morgen.",                 example_fa:"پول را فردا واریز می‌کنم.",           grammar:"ich überweise | Perfekt: hat überwiesen | untrennbar", builtin:true },
+  { id:17, word:"die Unterkunft",    type:"Nomen",    meaning:"اقامتگاه، محل سکونت",    example_de:"Die Unterkunft ist günstig.",                    example_fa:"اقامتگاه ارزان است.",                 grammar:"Plural: die Unterkünfte | Genitiv: der Unterkunft", builtin:true },
+  { id:18, word:"nachweisen",        type:"Verb",     meaning:"اثبات کردن، ارائه مدرک", example_de:"Sie muss ihre Kenntnisse nachweisen.",           example_fa:"باید دانش خود را اثبات کند.",         grammar:"ich weise nach | Perfekt: hat nachgewiesen | trennbar", builtin:true },
+  { id:19, word:"der Vertrag",       type:"Nomen",    meaning:"قرارداد",                 example_de:"Hast du den Vertrag unterschrieben?",            example_fa:"قرارداد را امضا کردی؟",               grammar:"Plural: die Verträge | Genitiv: des Vertrags", builtin:true },
+  { id:20, word:"die Genehmigung",   type:"Nomen",    meaning:"مجوز، اجازه رسمی",       example_de:"Wir brauchen eine Genehmigung dafür.",           example_fa:"برای این کار مجوز لازم داریم.",       grammar:"Plural: die Genehmigungen | Genitiv: der Genehmigung", builtin:true },
+];
+
+const TYPE_STYLES = {
+  "Nomen":    { color:"#c9a84c", bg:"rgba(201,168,76,0.12)" },
+  "Verb":     { color:"#5a9e6f", bg:"rgba(90,158,111,0.12)" },
+  "Adjektiv": { color:"#4a7fa5", bg:"rgba(74,127,165,0.12)" },
+  "Adverb":   { color:"#9b6ec4", bg:"rgba(155,110,196,0.12)" },
+  "Andere":   { color:"#7a7568", bg:"rgba(122,117,104,0.12)" },
+};
+const TYPES = ["Nomen","Verb","Adjektiv","Adverb","Andere"];
+const STORAGE_KEY = "woerter_v2";
+
+let userWords = [];
+let selectedType = "Nomen";
+let openId = null;
+
+// Quiz state
+let quizDeck = [];
+let quizIndex = 0;
+let quizKnow  = 0;
+let quizSkip  = 0;
+let quizShowAnswer = false;
+
+// ── STORAGE ───────────────────────────────────────────
+function loadStorage() {
+  try { const d = localStorage.getItem(STORAGE_KEY); userWords = d ? JSON.parse(d) : []; }
+  catch { userWords = []; }
+}
+function saveStorage() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userWords)); } catch {}
+}
+
+// ── TTS ───────────────────────────────────────────────
+function speak(text, e) {
+  if (e) e.stopPropagation();
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/\(sich\)/i,'').trim());
+  u.lang = 'de-DE';
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+// ── BACKUP ────────────────────────────────────────────
+function downloadBackup() {
+  if (userWords.length === 0) { alert('هنوز کلمه شخصی ندارید!'); return; }
+  const blob = new Blob([JSON.stringify(userWords, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'woerter-backup.json';
+  a.click();
+}
+
+// ── RENDER LIST ───────────────────────────────────────
+function renderList() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const filter = document.getElementById("filterType").value;
+  const all = [...userWords, ...BUILTIN];
+  const filtered = all.filter(w => {
+    return (w.word.toLowerCase().includes(search) || w.meaning.includes(search))
+        && (filter === "همه" || w.type === filter);
+  });
+
+  document.getElementById("listInfo").textContent =
+    filtered.length + " کلمه · " + userWords.length + " کلمه شخصی";
+
+  const container = document.getElementById("wordList");
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-msg">کلمه‌ای پیدا نشد</div>'; return;
+  }
+
+  container.innerHTML = filtered.map(w => {
+    const ts = TYPE_STYLES[w.type] || TYPE_STYLES["Andere"];
+    const isOpen = openId === w.id;
+    return `
+    <div class="word-card${isOpen?' open':''}" onclick="toggleCard(${w.id})">
+      <div class="word-card-header">
+        <span class="word-text">${w.word}</span>
+        <button class="speak-btn" onclick="speak('${w.word.replace(/'/g,"\\'")}',event)" title="تلفظ">🔊</button>
+        <span class="type-badge" style="color:${ts.color};background:${ts.bg}">${w.type}</span>
+        ${!w.builtin?'<span class="my-badge">من</span>':''}
+        <span class="arrow">${isOpen?'▲':'▼'}</span>
+      </div>
+      <div class="word-card-body">
+        <div class="meaning-text">${w.meaning}</div>
+        ${w.example_de?`<div class="example-de">${w.example_de}</div>`:''}
+        ${w.example_fa?`<div class="example-fa">${w.example_fa}</div>`:''}
+        ${w.grammar?`<div class="grammar-box">${w.grammar}</div>`:''}
+        ${!w.builtin?`<button class="delete-btn" onclick="deleteWord(event,${w.id})">🗑 حذف</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) { openId = openId===id ? null : id; renderList(); }
+function deleteWord(e, id) {
+  e.stopPropagation();
+  userWords = userWords.filter(w => w.id !== id);
+  saveStorage(); openId = null; renderList();
+}
+
+// ── TYPE BUTTONS ──────────────────────────────────────
+function renderTypeButtons() {
+  document.getElementById("typeButtons").innerHTML = TYPES.map(t => {
+    const ts = TYPE_STYLES[t], sel = t === selectedType;
+    return `<button class="type-btn" onclick="selectType('${t}')"
+      style="color:${sel?ts.color:'#7a7568'};border-color:${sel?ts.color:'#2e2c28'};background:${sel?ts.bg:'#242220'}">${t}</button>`;
+  }).join('');
+}
+function selectType(t) { selectedType = t; renderTypeButtons(); }
+
+// ── ADD WORD ──────────────────────────────────────────
+function addWord() {
+  const word    = document.getElementById("f-word").value.trim();
+  const meaning = document.getElementById("f-meaning").value.trim();
+  if (!word || !meaning) return;
+  userWords.unshift({
+    id: Date.now(), word, meaning, type: selectedType,
+    example_de: document.getElementById("f-example-de").value.trim(),
+    example_fa: document.getElementById("f-example-fa").value.trim(),
+    grammar:    document.getElementById("f-grammar").value.trim(),
+    builtin: false
+  });
+  saveStorage();
+  ["f-word","f-meaning","f-example-de","f-example-fa","f-grammar"].forEach(id =>
+    document.getElementById(id).value = "");
+  const btn = document.getElementById("saveBtn");
+  btn.textContent = "✓ ذخیره شد!"; btn.classList.add("success");
+  setTimeout(() => { btn.textContent = "ذخیره کلمه"; btn.classList.remove("success"); switchTab("list"); }, 1200);
+}
+
+// ── QUIZ ──────────────────────────────────────────────
+function initQuiz() {
+  const all = [...userWords, ...BUILTIN];
+  quizDeck = all.sort(() => Math.random()-0.5);
+  quizIndex = 0; quizKnow = 0; quizSkip = 0; quizShowAnswer = false;
+  renderQuiz();
+}
+
+function renderQuiz() {
+  document.getElementById("scoreKnow").textContent = quizKnow;
+  document.getElementById("scoreSkip").textContent = quizSkip;
+  document.getElementById("scoreLeft").textContent = Math.max(0, quizDeck.length - quizIndex);
+
+  const el = document.getElementById("quizContent");
+  if (!quizDeck.length) {
+    el.innerHTML = `<div class="quiz-empty">کلمه‌ای برای تمرین وجود ندارد.<br>ابتدا کلمه اضافه کنید 📚</div>`; return;
+  }
+  if (quizIndex >= quizDeck.length) {
+    el.innerHTML = `
+      <div class="quiz-card" style="text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:12px">🎉</div>
+        <div style="font-size:1.1rem;color:var(--text);margin-bottom:6px">تمرین تموم شد!</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">بلد بودم: ${quizKnow} · رد کردم: ${quizSkip}</div>
+        <button class="quiz-btn show-btn" onclick="initQuiz()" style="padding:12px 24px;border-radius:10px">دوباره بزن 🔄</button>
+      </div>`; return;
+  }
+
+  const w = quizDeck[quizIndex];
+  const ts = TYPE_STYLES[w.type] || TYPE_STYLES["Andere"];
+  el.innerHTML = `
+    <div class="quiz-progress">${quizIndex+1} از ${quizDeck.length}</div>
+    <div class="quiz-card">
+      <div class="quiz-word">${w.word}</div>
+      <div class="quiz-type" style="color:${ts.color}">${w.type}</div>
+      <button class="quiz-speak-btn" onclick="speak('${w.word.replace(/'/g,"\\'")}',event)">🔊 تلفظ</button>
+      <div class="quiz-answer-box${quizShowAnswer?' show':''}">
+        <div class="quiz-meaning">${w.meaning}</div>
+        ${w.example_de?`<div class="quiz-example">${w.example_de}</div>`:''}
+      </div>
+    </div>
+    <div class="quiz-btns">
+      ${!quizShowAnswer
+        ? `<button class="quiz-btn show-btn" onclick="revealAnswer()">نشون بده 👁</button>`
+        : `<button class="quiz-btn know-btn" onclick="quizAnswer(true)">بلدم ✓</button>
+           <button class="quiz-btn skip-btn" onclick="quizAnswer(false)">نمی‌دونم ✗</button>`
+      }
+    </div>`;
+}
+
+function revealAnswer() { quizShowAnswer = true; renderQuiz(); }
+function quizAnswer(knew) {
+  if (knew) quizKnow++; else quizSkip++;
+  quizIndex++; quizShowAnswer = false; renderQuiz();
+}
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(tab) {
+  ["list","add","quiz"].forEach(t => {
+    document.getElementById("tab-"+t).style.display = t===tab ? "block" : "none";
+    document.getElementById("nav-"+t).classList.toggle("active", t===tab);
+  });
+  document.getElementById("searchRow").style.display = tab==="list" ? "flex" : "none";
+  if (tab==="list")  renderList();
+  if (tab==="quiz")  initQuiz();
+}
+
+// ── INIT ──────────────────────────────────────────────
+loadStorage();
+renderList();
+renderTypeButtons();
+</script>
+
+</body>
+</html>
