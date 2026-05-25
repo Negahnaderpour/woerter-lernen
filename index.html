@@ -353,13 +353,15 @@ textarea.input{resize:none;line-height:1.6;}
 
 /* TOAST */
 .toast{
-  position:fixed;bottom:70px;left:50%;
-  transform:translateX(-50%) translateY(60px);
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(120px);
   background:var(--green);color:#0d1117;
-  padding:9px 18px;border-radius:20px;
-  font-size:13px;font-weight:700;z-index:999;
-  transition:transform 0.3s;direction:rtl;
-  white-space:nowrap;
+  padding:10px 22px;border-radius:20px;
+  font-size:13px;font-weight:700;z-index:9999;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  direction:rtl;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  pointer-events:none;
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
@@ -1142,100 +1144,243 @@ function renderGrammar(){
 }
 
 function quickGrammar(i){
-  document.getElementById('grammar-input').value = GRAMMAR_TOPICS[i].q;
-  askGrammar();
+  const g = {idx:i, ...GRAMMAR_DB[i]};
+  document.getElementById('grammar-input').value = g.title;
+  showGrammarCard(g);
 }
 
-async function askGrammar(){
-  const q = document.getElementById('grammar-input').value.trim();
-  if(!q){toast('❗ سوال را بنویس');return;}
+const GRAMMAR_DB = {
+  0:{title:"Präsens",level:"A1",summary:"زمان حال — برای بیان عادات، حقایق و اتفاقات جاری",
+    rules:[
+      {title:"تصریف منظم",text:"پسوند فعل بر اساس ضمیر تغییر می‌کند:\nich → -e (ich lerne)\ndu → -st (du lernst)\ner/sie/es → -t (er lernt)\nwir → -en (wir lernen)\nihr → -t (ihr lernt)\nSie/sie → -en (Sie lernen)"},
+      {title:"افعال بی‌قاعده مهم",text:"sein: ich bin, du bist, er ist, wir sind\nhaben: ich habe, du hast, er hat\nwerden: ich werde, du wirst, er wird"}
+    ],
+    examples:[{de:"Ich lerne jeden Tag Deutsch.",fa:"هر روز آلمانی یاد می‌گیرم."},{de:"Er ist Lehrer.",fa:"او معلم است."},{de:"Wir haben Zeit.",fa:"ما وقت داریم."}],
+    mistakes:[{wrong:"Ich lerne nicht jeden Tag.",note:"✅ این درست است! nicht بعد از فعل می‌آید."},{wrong:"Er ist ein Lehrer. (با Beruf)",note:"با مشاغل بدون حرف تعریف: Er ist Lehrer."}],
+    tip:"پسوند -st برای du همیشه ثابت است — حتی در افعال بی‌قاعده: du bist, du hast, du wirst"},
+  1:{title:"Artikel (der/die/das/ein/eine)",level:"A1",summary:"حروف تعریف معین و نامعین — یکی از سخت‌ترین بخش‌های آلمانی",
+    rules:[
+      {title:"حروف تعریف معین",text:"der → مذکر (der Mann, der Tisch)\ndie → مؤنث (die Frau, die Tür)\ndas → خنثی (das Kind, das Buch)\ndie → جمع (die Männer, die Frauen)"},
+      {title:"حروف تعریف نامعین",text:"ein → مذکر و خنثی (ein Mann, ein Kind)\neine → مؤنث (eine Frau)\nkein/keine → نفی (kein Mann, keine Frau)"}
+    ],
+    examples:[{de:"Der Mann ist nett.",fa:"مرد مهربان است."},{de:"Ich habe ein Buch.",fa:"یک کتاب دارم."},{de:"Das ist keine gute Idee.",fa:"این ایده‌ی خوبی نیست."}],
+    mistakes:[{wrong:"Ich habe ein Kind. → Akkusativ: Ich habe ein Kind.",note:"✅ ein/eine در Akkusativ برای مذکر به einen تبدیل می‌شود: Ich sehe einen Mann."},{wrong:"Das Haus ist groß. / Das ist ein Haus.",note:"✅ هر دو درست — das در اول جمله می‌تواند ضمیر اشاره باشد."}],
+    tip:"جنس اسم‌ها را باید حفظ کرد — هیچ قانون کلی وجود ندارد. همیشه اسم + حرف تعریف را با هم یاد بگیر!"},
+  2:{title:"Verneinung mit nicht / kein",level:"A1",summary:"نفی جمله — با nicht یا kein",
+    rules:[
+      {title:"nicht",text:"برای نفی فعل، صفت یا قید استفاده می‌شود.\nمعمولاً در آخر جمله یا قبل از کلمه‌ای که نفی می‌کند:\nIch komme nicht. / Das ist nicht gut."},
+      {title:"kein/keine",text:"برای نفی اسم با حرف تعریف نامعین یا بدون حرف تعریف:\nIch habe kein Auto. (= Ich habe nicht ein Auto)\nIch habe keine Zeit."}
+    ],
+    examples:[{de:"Ich verstehe das nicht.",fa:"این را نمی‌فهمم."},{de:"Er hat kein Geld.",fa:"او پول ندارد."},{de:"Das ist nicht richtig.",fa:"این درست نیست."}],
+    mistakes:[{wrong:"Ich habe nicht ein Auto.",note:"❌ با اسم نامعین از kein استفاده کن: Ich habe kein Auto."},{wrong:"Ich nicht komme.",note:"❌ nicht قبل از فعل اصلی نمی‌آید (در جمله اصلی): Ich komme nicht."}],
+    tip:"قانون ساده: قبل از اسم → kein | بقیه موارد → nicht"},
+  3:{title:"Perfekt",level:"A2",summary:"گذشته‌ی مکالمه‌ای — برای صحبت از گذشته در محاوره",
+    rules:[
+      {title:"ساختار",text:"haben/sein (در زمان حال) + Partizip II\nich habe gespielt / ich bin gegangen"},
+      {title:"haben یا sein؟",text:"sein: افعال حرکتی (gehen, kommen, fahren, laufen) و تغییر حال (werden, sterben, einschlafen)\nهمه افعال دیگر با haben"},
+      {title:"Partizip II",text:"منظم: ge + stamm + t → gemacht, gespielt, gelernt\nنامنظم: باید حفظ شود → gegangen, geschrieben, gesehen"}
+    ],
+    examples:[{de:"Ich habe gestern Fußball gespielt.",fa:"دیروز فوتبال بازی کردم."},{de:"Sie ist nach Berlin gefahren.",fa:"او به برلین رفت."},{de:"Wir haben einen Film gesehen.",fa:"یک فیلم دیدیم."}],
+    mistakes:[{wrong:"Ich bin gegessen.",note:"❌ essen با haben: Ich habe gegessen."},{wrong:"Er hat gegangen.",note:"❌ gehen با sein: Er ist gegangen."}],
+    tip:"حرکت + مقصد → sein | بقیه → haben. شک داری؟ haben احتمالاً درست‌تره!"},
+  4:{title:"Modalverben",level:"A2",summary:"افعال وجهی — برای بیان توانایی، اجازه، ضرورت و خواسته",
+    rules:[
+      {title:"افعال وجهی اصلی",text:"können → توانستن (ich kann)\nmüssen → مجبور بودن (ich muss)\ndürfen → اجازه داشتن (ich darf)\nwollen → خواستن (ich will)\nsollen → باید (از طرف دیگری) (ich soll)\nmöchten → دوست داشتن (ich möchte)"},
+      {title:"ساختار جمله",text:"فعل وجهی در جایگاه دوم + مصدر در آخر جمله:\nIch kann Deutsch sprechen.\nSie muss heute arbeiten."}
+    ],
+    examples:[{de:"Kannst du mir helfen?",fa:"می‌توانی به من کمک کنی؟"},{de:"Du musst das Formular ausfüllen.",fa:"باید این فرم را پر کنی."},{de:"Ich möchte einen Kaffee.",fa:"یک قهوه می‌خواهم."}],
+    mistakes:[{wrong:"Ich kann sprechen Deutsch.",note:"❌ مصدر همیشه به آخر جمله می‌رود: Ich kann Deutsch sprechen."},{wrong:"Ich muss nicht kommen. (= I don't have to)",note:"✅ این درست است — müssen + nicht = مجبور نیستی. برای ممنوع: darf nicht"}],
+    tip:"müssen nicht = مجبور نیستی | darf nicht = نباید (ممنوع است) — این تفاوت بسیار مهم است!"},
+  5:{title:"Akkusativ und Dativ",level:"A2",summary:"حالت‌های دستوری — مفعول مستقیم و غیرمستقیم",
+    rules:[
+      {title:"Akkusativ (مفعول مستقیم)",text:"جواب سوال wen? / was? را می‌دهد.\nتغییر فقط در مذکر: der → den / ein → einen\nIch sehe den Mann. / Ich kaufe einen Tisch."},
+      {title:"Dativ (مفعول غیرمستقیم)",text:"جواب سوال wem? را می‌دهد.\nder/ein → dem/einem | die/eine → der/einer | das/ein → dem/einem\nIch helfe dem Mann. / Ich gebe einer Frau das Buch."},
+      {title:"حروف اضافه مهم",text:"Akkusativ: durch, für, gegen, ohne, um\nDativ: aus, bei, mit, nach, seit, von, zu, gegenüber"}
+    ],
+    examples:[{de:"Ich kaufe den Tisch. (Akk)",fa:"میز را می‌خرم."},{de:"Ich helfe dem Kind. (Dat)",fa:"به بچه کمک می‌کنم."},{de:"Das Geschenk ist für dich. (Akk)",fa:"هدیه برای توست."}],
+    mistakes:[{wrong:"Ich helfe den Mann.",note:"❌ helfen حرف اضافه Dativ می‌گیرد: Ich helfe dem Mann."},{wrong:"Mit dem Bus fahre ich. → Mit den Bus",note:"❌ mit همیشه Dativ: mit dem Bus (مذکر)"}],
+    tip:"این حروف اضافه همیشه Dativ: aus bei mit nach seit von zu — حفظشان کن!"},
+  6:{title:"Nebensätze (weil / dass / wenn)",level:"B1",summary:"جملات فرعی — فعل به انتهای جمله می‌رود",
+    rules:[
+      {title:"قانون اصلی",text:"در جمله فرعی فعل صرف‌شده به آخر می‌رود!\nweil (چون): Ich lerne Deutsch, weil ich in Deutschland arbeiten möchte.\ndass (که): Ich denke, dass das richtig ist.\nwenn (وقتی/اگر): Wenn ich Zeit habe, lerne ich."},
+      {title:"ترتیب کلمات",text:"جمله اصلی + کاما +接続詞 + ... + فعل\nیا:接続詞 + ... + فعل + کاما + فعل + جمله اصلی\nWeil es regnet, bleibe ich zu Hause."}
+    ],
+    examples:[{de:"Er kommt nicht, weil er krank ist.",fa:"نمی‌آید چون مریض است."},{de:"Ich weiß, dass sie Recht hat.",fa:"می‌دانم که او حق دارد."},{de:"Wenn ich Geld hätte, würde ich reisen.",fa:"اگر پول داشتم، سفر می‌کردم."}],
+    mistakes:[{wrong:"Ich lerne Deutsch, weil ich möchte in Deutschland arbeiten.",note:"❌ فعل وجهی هم به آخر می‌رود: weil ich in Deutschland arbeiten möchte."},{wrong:"Obwohl es schwer ist, aber ich lerne.",note:"❌ بعد از obwohl نباید aber بیاید!"}],
+    tip:"جمله فرعی = جزیره‌ای که فعل آخر است. تصور کن فعل را به آخر هل می‌دهی!"},
+  7:{title:"Präteritum",level:"B1",summary:"گذشته‌ی نوشتاری — در متن، داستان و روزنامه",
+    rules:[
+      {title:"افعال منظم",text:"stamm + te + پسوند\nich machte, du machtest, er machte\nwir machten, ihr machtet, sie machten"},
+      {title:"افعال بی‌قاعده مهم",text:"sein: war, warst, war, waren\nhaben: hatte, hattest, hatte, hatten\ngehen: ging | kommen: kam | sehen: sah\nsagen: sagte | geben: gab | nehmen: nahm"}
+    ],
+    examples:[{de:"Als ich jung war, lebte ich in Iran.",fa:"وقتی جوان بودم، در ایران زندگی می‌کردم."},{de:"Er kam gestern an.",fa:"دیروز رسید."},{de:"Sie hatte keine Zeit.",fa:"وقت نداشت."}],
+    mistakes:[{wrong:"Ich war gegangen. (Plusquamperfekt نیاز نیست)",note:"برای سادگی در B1 از Präteritum یا Perfekt استفاده کن."},{wrong:"Er geht-te",note:"❌ افعال بی‌قاعده پسوند -te نمی‌گیرند — باید حفظ شوند."}],
+    tip:"در مکالمه روزمره از Perfekt استفاده کن. Präteritum برای نوشتن و داستان است."},
+  8:{title:"Komparativ und Superlativ",level:"B1",summary:"مقایسه — بهتر، بهترین",
+    rules:[
+      {title:"Komparativ",text:"صفت + -er + als\nschnell → schneller als\ngut → besser als (بی‌قاعده)\nviel → mehr als\ngern → lieber als"},
+      {title:"Superlativ",text:"am + صفت + -sten\nschnell → am schnellsten\ngut → am besten\nviel → am meisten\ngern → am liebsten"}
+    ],
+    examples:[{de:"Berlin ist größer als Frankfurt.",fa:"برلین از فرانکفورت بزرگ‌تر است."},{de:"Das ist das beste Restaurant hier.",fa:"این بهترین رستوران اینجاست."},{de:"Ich lerne am liebsten morgens.",fa:"بیشتر از همه صبح‌ها یاد می‌گیرم."}],
+    mistakes:[{wrong:"mehr schnell",note:"❌ در آلمانی mehr + صفت نداریم — پسوند -er اضافه می‌کنیم: schneller"},{wrong:"Sie ist so alt wie ich.",note:"✅ این درست است! برابری با so...wie بیان می‌شود."}],
+    tip:"gut/viel/gern بی‌قاعده‌اند — besser/mehr/lieber — حتماً حفظ کن!"},
+  9:{title:"Konjunktiv II",level:"B2",summary:"وجه شرطی — برای ادب، آرزو و جملات شرطی",
+    rules:[
+      {title:"ساختار با würde",text:"würde + Infinitiv — برای اکثر افعال\nIch würde gerne reisen.\nSie würden das nicht machen."},
+      {title:"افعال مستقیم (بدون würde)",text:"sein → wäre | haben → hätte | können → könnte\nmüssen → müsste | dürfen → dürfte | werden → würde"},
+      {title:"جملات شرطی",text:"Wenn ich Zeit hätte, würde ich mehr lernen.\nWenn ich du wäre, würde ich das nicht tun."}
+    ],
+    examples:[{de:"Könnten Sie mir bitte helfen?",fa:"آیا می‌توانید کمکم کنید؟ (ادبانه)"},{de:"Ich wäre gerne Ärztin.",fa:"دوست داشتم دکتر باشم."},{de:"Wenn ich Geld hätte, würde ich reisen.",fa:"اگر پول داشتم سفر می‌کردم."}],
+    mistakes:[{wrong:"Wenn ich hätte Geld...",note:"❌ در جمله فرعی فعل آخر است: Wenn ich Geld hätte..."},{wrong:"Ich würde sein glücklich.",note:"❌ sein در Konjunktiv II مستقیم: Ich wäre glücklich."}],
+    tip:"Könnten Sie...? و Hätten Sie...? ادبانه‌ترین راه درخواست در آلمانی هستند!"},
+  10:{title:"Passiv",level:"B2",summary:"مجهول — وقتی فاعل مهم نیست یا نامشخص است",
+    rules:[
+      {title:"Vorgangspassiv (عمل)",text:"werden + Partizip II\nPräsens: Das Haus wird gebaut.\nPräteritum: Das Haus wurde gebaut.\nPerfekt: Das Haus ist gebaut worden."},
+      {title:"Zustandspassiv (نتیجه)",text:"sein + Partizip II — وضعیت بعد از عمل\nDas Haus ist gebaut. (ساخته شده است)\nDie Tür ist geschlossen."},
+      {title:"فاعل در Passiv",text:"با von + Dativ فاعل را بیان می‌کنیم:\nDas Buch wurde von ihr geschrieben."}
+    ],
+    examples:[{de:"Das Formular wird ausgefüllt.",fa:"فرم پر می‌شود."},{de:"Der Brief wurde gestern verschickt.",fa:"نامه دیروز فرستاده شد."},{de:"Die Aufgabe ist erledigt.",fa:"کار انجام شده است."}],
+    mistakes:[{wrong:"Das Haus wird gebaut worden.",note:"❌ Perfekt Passiv: ist gebaut worden (نه wird)"},{wrong:"Ich wurde von ihm geholfen.",note:"❌ helfen Dativ می‌گیرد: Mir wurde von ihm geholfen."}],
+    tip:"Vorgangspassiv = تأکید بر عمل (werden) | Zustandspassiv = تأکید بر نتیجه (sein)"},
+  11:{title:"Relativsätze",level:"B2",summary:"جملات وصفی — توصیف اسم با جمله فرعی",
+    rules:[
+      {title:"ضمایر نسبی",text:"جنس اسم اصلی ملاک است، نقش در جمله فرعی تصریف را مشخص می‌کند:\nNom: der/die/das/die\nAkk: den/die/das/die\nDat: dem/der/dem/denen\nGen: dessen/deren/dessen/deren"},
+      {title:"ساختار",text:"اسم + , + ضمیر نسبی + ... + فعل\nDas Buch, das ich lese, ist interessant.\nDer Mann, dem ich helfe, ist krank."}
+    ],
+    examples:[{de:"Die Frau, die ich kenne, ist Ärztin.",fa:"زنی که می‌شناسم دکتر است."},{de:"Das Haus, in dem ich wohne, ist alt.",fa:"خانه‌ای که در آن زندگی می‌کنم قدیمی است."},{de:"Der Mann, dessen Auto rot ist, heißt Peter.",fa:"مردی که ماشینش قرمز است Peter نام دارد."}],
+    mistakes:[{wrong:"Das Buch, das ich lese es...",note:"❌ ضمیر نسبی جایگزین ضمیر می‌شود — es اضافه است."},{wrong:"Die Frau, der ich helfe...",note:"✅ helfen + Dativ: Die Frau, der ich helfe (der = Dativ مؤنث) — درست است!"}],
+    tip:"ضمیر نسبی مثل der/die/das تصریف می‌شود فقط Genitiv و Dativ جمع فرق دارند."},
+  12:{title:"Infinitivkonstruktionen",level:"B2",summary:"ساختارهای مصدری — جایگزین جملات فرعی",
+    rules:[
+      {title:"um...zu (هدف)",text:"برای بیان هدف — معادل damit/weil\nIch lerne Deutsch, um in Deutschland zu arbeiten.\nفاعل هر دو جمله باید یکی باشد!"},
+      {title:"ohne...zu (بدون اینکه)",text:"Er ging, ohne etwas zu sagen.\nSie hat bestanden, ohne viel zu üben."},
+      {title:"anstatt...zu (به جای اینکه)",text:"Anstatt zu lernen, schaut er TV.\nSie arbeitet, anstatt sich auszuruhen."}
+    ],
+    examples:[{de:"Ich spare Geld, um eine Reise zu machen.",fa:"پول پس‌انداز می‌کنم تا سفر کنم."},{de:"Er kam, ohne anzuklopfen.",fa:"آمد بدون اینکه در بزند."},{de:"Anstatt zu schlafen, lernte sie.",fa:"به جای اینکه بخوابد، درس خواند."}],
+    mistakes:[{wrong:"Ich lerne, um ich Deutsch zu sprechen.",note:"❌ بعد از um فاعل نمی‌آید: Ich lerne, um Deutsch zu sprechen."},{wrong:"Er arbeitet, ohne dass er Pause macht. → ohne zu",note:"✅ اگر فاعل‌ها یکی باشند از ohne zu استفاده کن — ساده‌تر است."}],
+    tip:"فاعل هر دو جمله یکی است؟ → ohne/um/anstatt + zu + Infinitiv. فرق دارد؟ → ohne dass + جمله فرعی"},
+  13:{title:"Konnektoren (B2)",level:"B2",summary:"کلمات ربط پیشرفته برای نوشتن و صحبت رسمی",
+    rules:[
+      {title:"تضاد",text:"obwohl + جمله فرعی (فعل آخر)\ntrotzdem / dennoch + جمله اصلی\njedoch / allerdings (در میان جمله)"},
+      {title:"علت و نتیجه",text:"weil/da + جمله فرعی\ndeshalb/daher/darum + جمله اصلی\nfolglich/infolgedessen (رسمی‌تر)"},
+      {title:"افزودن و مقایسه",text:"außerdem / darüber hinaus (علاوه بر این)\neinerseits...andererseits (از یک طرف...از طرف دیگر)\nsowohl...als auch (هم...هم)"}
+    ],
+    examples:[{de:"Obwohl es schwer ist, gebe ich nicht auf.",fa:"اگرچه سخت است، تسلیم نمی‌شوم."},{de:"Er ist krank, deshalb kommt er nicht.",fa:"مریض است، بنابراین نمی‌آید."},{de:"Einerseits ist es teuer, andererseits sehr gut.",fa:"از یک طرف گران است، از طرف دیگر خیلی خوب."}],
+    mistakes:[{wrong:"Obwohl es schwer ist, aber...",note:"❌ بعد از obwohl نباید aber بیاید!"},{wrong:"Deshalb, er kommt nicht.",note:"❌ بعد از deshalb فعل می‌آید نه فاعل: Deshalb kommt er nicht."}],
+    tip:"deshalb/daher/darum/trotzdem → فعل بعد از آنها می‌آید (Position 1 هستند)!"},
+  14:{title:"Konjunktiv I",level:"C1",summary:"نقل قول غیرمستقیم — در روزنامه، گزارش و متون رسمی",
+    rules:[
+      {title:"کاربرد",text:"برای نقل قول غیرمستقیم — نشان می‌دهد که این کلام شخص دیگری است:\nDer Minister sagte, er sei krank. (= Er ist krank.)\nSie erklärte, sie habe keine Zeit."},
+      {title:"تصریف",text:"sein: sei, seist, sei, seien\nhaben: habe, habest, habe, haben\nاکثر افعال: Infinitiv-stamm + e (ohne Personalpräfix)\nkommen → er komme / gehen → er gehe"}
+    ],
+    examples:[{de:"Er sagte, er sei müde.",fa:"گفت که خسته است."},{de:"Die Zeitung berichtete, der Präsident habe das Gesetz unterzeichnet.",fa:"روزنامه گزارش داد که رئیس‌جمهور قانون را امضا کرده."},{de:"Sie erklärte, sie könne nicht kommen.",fa:"توضیح داد که نمی‌تواند بیاید."}],
+    mistakes:[{wrong:"Er sagte, dass er ist müde.",note:"در نقل قول غیرمستقیم رسمی از Konjunktiv I استفاده می‌شود، نه Indikativ."},{wrong:"Sie sagte, sie haben keine Zeit.",note:"Konjunktiv I: sie habe (نه haben — آن با Indikativ یکی می‌شود، پس Konjunktiv II: hätte)"}],
+    tip:"اگر Konjunktiv I با Indikativ یکی شد (wir kommen = wir kommen) → از Konjunktiv II استفاده کن!"},
+  15:{title:"Nominalisierung",level:"C1",summary:"اسم‌سازی — تبدیل فعل و صفت به اسم برای نوشتار رسمی",
+    rules:[
+      {title:"از فعل",text:"Infinitiv به عنوان اسم (خنثی):\ndas Lernen, das Arbeiten, das Schreiben\nیا با پسوند -ung (مؤنث):\ndie Lösung, die Entscheidung, die Entwicklung\nیا -nis/-heit/-keit/-schaft:\ndie Kenntnis, die Freiheit, die Möglichkeit"},
+      {title:"از صفت",text:"صفت‌ها با حرف بزرگ و حرف تعریف:\nder/die/das + صفت + e\nder Kranke, die Alte, das Gute\nدر مصدر: das Gute, das Schöne"}
+    ],
+    examples:[{de:"Die Entwicklung der Technologie ist beeindruckend.",fa:"توسعه‌ی فناوری چشمگیر است."},{de:"Das Lernen macht Spaß.",fa:"یادگیری جالب است."},{de:"Die Möglichkeit besteht, dass...",fa:"این امکان وجود دارد که..."}],
+    mistakes:[{wrong:"Die Lösung-en des Problems",note:"✅ Lösung در جمع: die Lösungen — درست است."},{wrong:"Das ist eine gute Entwicklung. → Nominalisierung: eine gute Entwicklung",note:"✅ صفت قبل از اسم با تصریف صحیح — درست است."}],
+    tip:"در C1 از اسم‌سازی استفاده کن تا نوشتارت رسمی‌تر و حرفه‌ای‌تر به نظر برسد!"},
+  16:{title:"Partizipialkonstruktionen",level:"C1",summary:"ساختارهای مشارکتی — جایگزین جملات وصفی و فرعی",
+    rules:[
+      {title:"Partizip I (فعل در جریان)",text:"Infinitiv + d → صفت\nschlafend, lachend, weinend, kommend\nDas schlafende Kind = Das Kind, das schläft."},
+      {title:"Partizip II (فعل تمام‌شده/مجهول)",text:"Partizip II → صفت\nDas geschriebene Buch = Das Buch, das geschrieben wurde.\nDie gelöste Aufgabe = Die Aufgabe, die gelöst wurde."},
+      {title:"گسترش",text:"می‌توان قبل از Partizip توضیحات اضافه کرد:\nDie von ihr verfasste Studie...\nDas seit Jahren bestehende Problem..."}
+    ],
+    examples:[{de:"Das weinende Kind sucht seine Mutter.",fa:"بچه‌ای که گریه می‌کند دنبال مادرش می‌گردد."},{de:"Das gelöste Problem erleichtert die Arbeit.",fa:"مشکل حل‌شده کار را آسان می‌کند."},{de:"Die im Labor durchgeführten Experimente...",fa:"آزمایش‌هایی که در آزمایشگاه انجام شدند..."}],
+    mistakes:[{wrong:"Das geschlafene Kind",note:"❌ schlafen Partizip I: das schlafende Kind (نه geschlafen — آن Partizip II است)"},{wrong:"Die lösende Aufgabe",note:"❌ برای معنی مجهول از Partizip II استفاده کن: die gelöste Aufgabe"}],
+    tip:"Partizip I = همزمان با فعل اصلی | Partizip II = قبل از فعل اصلی یا مجهول"},
+  17:{title:"Stilmittel und Textkohärenz",level:"C2",summary:"ابزارهای سبکی و انسجام متن — برای نوشتار حرفه‌ای C2",
+    rules:[
+      {title:"ابزارهای انسجام",text:"ارجاع: dieser/jener/solch- به جای تکرار\nرابط‌های متنی: zunächst, im Anschluss daran, abschließend\nتقابل: im Gegensatz dazu, wohingegen, während"},
+      {title:"سبک رسمی",text:"Passiv برای بی‌طرفی\nNominalisierung برای فشردگی\nاجتناب از ich در متن علمی\nاستفاده از man یا Passiv"}
+    ],
+    examples:[{de:"Zunächst ist festzustellen, dass...",fa:"در ابتدا باید گفت که..."},{de:"Im Gegensatz dazu steht die Ansicht, dass...",fa:"در مقابل این دیدگاه وجود دارد که..."},{de:"Es lässt sich schlussfolgern, dass...",fa:"می‌توان نتیجه گرفت که..."}],
+    mistakes:[{wrong:"Ich denke, dass... (در متن علمی)",note:"در نوشتار C2 از: Es ist anzunehmen, dass... / Die Analyse zeigt, dass... استفاده کن"},{wrong:"sehr gut, sehr interessant",note:"در C2 از adjektiv‌های دقیق‌تر استفاده کن: hervorragend, bemerkenswert, außerordentlich"}],
+    tip:"C2 = دقت در انتخاب کلمه + انسجام متن + سبک متناسب با موقعیت. کیفیت مهم‌تر از کمیت است!"}
+};
 
-  const resultEl = document.getElementById('grammar-result');
-  resultEl.innerHTML = `
-    <div style="text-align:center;padding:30px;color:var(--muted);">
-      <div style="font-size:30px;animation:spin 1s linear infinite;display:inline-block;">⚙️</div>
-      <div style="margin-top:10px;direction:rtl;font-size:13px;">AI در حال آماده کردن توضیح...</div>
-    </div>`;
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:1000,
-        system:`تو یک معلم حرفه‌ای و صبور زبان آلمانی هستی که به فارسی روان توضیح می‌دهی. 
-وقتی یک قاعده گرامری پرسیده می‌شود، توضیح کامل و ساختارمند بده.
-
-دقیقاً این JSON را برگردان — بدون backtick یا توضیح اضافه:
-{
-  "title": "نام قاعده به آلمانی",
-  "level": "سطح A1/A2/B1/B2/C1/C2",
-  "summary": "خلاصه یک‌جمله‌ای به فارسی",
-  "rules": [
-    {"title": "عنوان قاعده", "text": "توضیح کامل به فارسی"}
-  ],
-  "examples": [
-    {"de": "جمله آلمانی", "fa": "ترجمه فارسی"}
-  ],
-  "mistakes": [
-    {"wrong": "اشتباه رایج", "note": "توضیح چرا اشتباه است"}
-  ],
-  "tip": "یک نکته طلایی برای یادسپاری"
-}
-
-حداکثر ۳ قاعده، ۴ مثال، ۲ اشتباه رایج بنویس.`,
-        messages:[{role:"user",content:`این قاعده گرامری را توضیح بده: ${q}`}]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.find(c=>c.type==='text')?.text||'{}';
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const p = JSON.parse(clean);
-
-    const html = `
-      <div class="grammar-card open" style="margin-bottom:12px;">
-        <div style="padding:14px;border-bottom:1px solid var(--border);">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div>
-              <div class="grammar-name">${p.title||q}</div>
-              <div class="grammar-fa">${p.summary||''}</div>
-            </div>
-            <span style="font-size:11px;padding:3px 8px;border-radius:8px;background:rgba(88,166,255,0.15);color:var(--accent);border:1px solid rgba(88,166,255,0.3);white-space:nowrap;">${p.level||''}</span>
-          </div>
-        </div>
-        <div class="grammar-body" style="display:block;">
-          ${(p.rules||[]).map(r=>`
-            <div class="rule-box">
-              <div class="rule-title">${r.title}</div>
-              <div class="rule-text">${(r.text||'').replace(/\n/g,'<br/>')}</div>
-            </div>`).join('')}
-          ${(p.examples||[]).map(ex=>`
-            <div class="example-row">
-              <div class="ex-de">✅ ${ex.de}</div>
-              <div class="ex-fa">${ex.fa}</div>
-            </div>`).join('')}
-          ${(p.mistakes||[]).map(m=>`
-            <div class="wrong-row">
-              <div class="ex-wrong">❌ ${m.wrong}</div>
-              <div style="font-size:11px;color:var(--muted);direction:rtl;margin-top:3px;">⚠️ ${m.note}</div>
-            </div>`).join('')}
-          ${p.tip?`
-            <div style="background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.25);border-radius:8px;padding:10px;margin-top:6px;">
-              <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💡 نکته طلایی</div>
-              <div style="font-size:12px;color:var(--text);direction:rtl;line-height:1.6;">${p.tip}</div>
-            </div>`:''}
-          <button onclick="saveGrammar(${JSON.stringify(p).replace(/"/g,'&quot;')})" 
-            style="margin-top:10px;padding:7px 14px;border-radius:8px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);color:var(--green);font-size:12px;cursor:pointer;font-family:'Vazirmatn',sans-serif;direction:rtl;">
-            📌 ذخیره توضیح
-          </button>
-        </div>
-      </div>`;
-
-    resultEl.innerHTML = html;
-  } catch(e){
-    resultEl.innerHTML=`<div style="color:var(--accent2);direction:rtl;font-size:13px;padding:16px;">❌ خطا در اتصال. اینترنت را بررسی کن.</div>`;
+function askGrammar(){
+  const q = document.getElementById('grammar-input').value.trim().toLowerCase();
+  if(!q){toast('❗ موضوع را بنویس');return;}
+  
+  // جستجو در دیتابیس
+  let found = null;
+  const keys = Object.keys(GRAMMAR_DB);
+  for(let k of keys){
+    const g = GRAMMAR_DB[k];
+    const searchIn = (g.title+' '+g.summary+' '+g.level).toLowerCase();
+    const qWords = q.split(' ');
+    if(qWords.some(w => w.length>2 && searchIn.includes(w))){
+      found = {idx:k, ...g};
+      break;
+    }
   }
+  
+  // اگر پیدا نشد، اولین چیپ مرتبط را نشان بده
+  if(!found){
+    document.getElementById('grammar-result').innerHTML=`
+      <div style="background:rgba(247,129,102,0.1);border:1px solid rgba(247,129,102,0.3);border-radius:12px;padding:16px;direction:rtl;text-align:center;">
+        <div style="font-size:20px;margin-bottom:8px;">🔍</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:6px;">نتیجه‌ای پیدا نشد</div>
+        <div style="font-size:12px;color:var(--muted);">از چیپ‌های بالا موضوع را انتخاب کن</div>
+      </div>`;
+    return;
+  }
+  showGrammarCard(found);
+}
+
+function showGrammarCard(g){
+  const resultEl = document.getElementById('grammar-result');
+  const safeG = JSON.stringify(g).replace(/'/g,"\\'");
+  resultEl.innerHTML = `
+    <div class="grammar-card" style="border-color:rgba(88,166,255,0.3);margin-bottom:12px;">
+      <div style="padding:14px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="grammar-name">${g.title}</div>
+            <div class="grammar-fa">${g.summary}</div>
+          </div>
+          <span style="font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(88,166,255,0.15);color:var(--accent);border:1px solid rgba(88,166,255,0.3);">${g.level}</span>
+        </div>
+      </div>
+      <div class="grammar-body" style="display:block;">
+        ${g.rules.map(r=>`
+          <div class="rule-box">
+            <div class="rule-title">${r.title}</div>
+            <div class="rule-text">${r.text.replace(/\n/g,'<br/>')}</div>
+          </div>`).join('')}
+        ${g.examples.map(ex=>`
+          <div class="example-row">
+            <div class="ex-de">✅ ${ex.de}</div>
+            <div class="ex-fa">${ex.fa}</div>
+          </div>`).join('')}
+        ${g.mistakes.map(m=>`
+          <div class="wrong-row">
+            <div class="ex-wrong">❌ ${m.wrong}</div>
+            <div style="font-size:11px;color:var(--muted);direction:rtl;margin-top:3px;">⚠️ ${m.note}</div>
+          </div>`).join('')}
+        <div style="background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.25);border-radius:8px;padding:10px;margin-top:8px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💡 نکته طلایی</div>
+          <div style="font-size:12px;color:var(--text);direction:rtl;line-height:1.6;">${g.tip}</div>
+        </div>
+        <button onclick='saveGrammarItem(${JSON.stringify(g).replace(/\\/g,"\\\\").replace(/'/g,"\\'")})' 
+          style="margin-top:10px;padding:7px 14px;border-radius:8px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);color:var(--green);font-size:12px;cursor:pointer;font-family:'Vazirmatn',sans-serif;direction:rtl;">
+          📌 ذخیره
+        </button>
+      </div>
+    </div>`;
+}
+
+function saveGrammarItem(g){
+  if(grammarSaved.find(x=>x.title===g.title)){toast('قبلاً ذخیره شده!');return;}
+  grammarSaved.unshift({...g, savedAt:Date.now()});
+  localStorage.setItem('dm_grammar_saved',JSON.stringify(grammarSaved));
+  renderGrammarSaved();
+  toast('📌 ذخیره شد!');
 }
 
 function saveGrammar(p){
@@ -1295,10 +1440,15 @@ function deleteGrammar(i){
 }
 
 // ══════════════ TOAST ══════════════
+let toastTimer = null;
 function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2200);
+  const el = document.getElementById('toast');
+  if(toastTimer) clearTimeout(toastTimer);
+  el.classList.remove('show');
+  el.textContent = msg;
+  void el.offsetWidth;
+  el.classList.add('show');
+  toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, 2500);
 }
 
 // ══════════════ PWA ══════════════
