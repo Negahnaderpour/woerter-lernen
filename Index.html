@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0d1117"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="DeutschMeister"/>
+<link rel="manifest" href="manifest.json"/>
+<title>DeutschMeister</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --surface3: #30363d;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --accent2: #f78166;
+  --gold: #e3b341;
+  --green: #3fb950;
+  --purple: #bc8cff;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --radius: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Vazirmatn',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;flex-direction:column;
+}
+
+/* HEADER */
+.header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.logo{
+  font-family:'Fraunces',serif;
+  font-size:20px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header-sub{font-size:11px;color:var(--muted);direction:rtl;}
+
+/* NAV */
+.nav{
+  display:flex;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  flex-shrink:0;order:3;
+}
+.nav-item{
+  flex:1;padding:10px 4px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;border-top:2px solid transparent;
+  transition:all 0.2s;color:var(--muted);font-size:10px;
+}
+.nav-item.active{color:var(--accent);border-top-color:var(--accent);}
+.nav-icon{font-size:20px;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;order:2;}
+.screen{display:none;padding:14px;}
+.screen.active{display:block;}
+
+/* CARDS */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;
+}
+.card-title{
+  font-size:13px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:12px;direction:rtl;
+}
+
+/* BUTTONS */
+.btn{
+  padding:10px 18px;border-radius:8px;
+  font-family:'Vazirmatn',sans-serif;font-size:14px;
+  cursor:pointer;border:none;font-weight:600;
+  transition:all 0.2s;direction:rtl;
+}
+.btn-primary{background:var(--accent);color:#0d1117;}
+.btn-primary:active{opacity:0.8;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-danger{background:rgba(247,129,102,0.15);color:var(--accent2);border:1px solid rgba(247,129,102,0.3);}
+
+/* INPUTS */
+.input{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);
+  font-family:'Vazirmatn',sans-serif;font-size:14px;
+  outline:none;transition:border-color 0.2s;
+}
+.input:focus{border-color:var(--accent);}
+.input::placeholder{color:var(--muted);}
+textarea.input{resize:none;line-height:1.6;}
+
+/* ══════════════════════════════
+   SCREEN 1: NOTES / TEXTS
+══════════════════════════════ */
+.notes-toolbar{
+  display:flex;gap:8px;margin-bottom:14px;
+}
+.notes-toolbar .input{flex:1;}
+
+.note-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;margin-bottom:10px;
+  cursor:pointer;transition:border-color 0.2s;
+}
+.note-card:active{border-color:var(--accent);}
+.note-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.note-title{font-size:15px;font-weight:600;color:var(--text);}
+.note-tag{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(88,166,255,0.15);color:var(--accent);
+  border:1px solid rgba(88,166,255,0.3);white-space:nowrap;
+}
+.note-preview{font-size:12px;color:var(--muted);line-height:1.5;direction:rtl;}
+.note-date{font-size:11px;color:var(--muted);margin-top:6px;}
+
+/* NOTE EDITOR */
+.note-editor{display:none;}
+.note-editor.open{display:flex;flex-direction:column;height:calc(100vh - 120px);}
+.editor-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:12px;
+}
+.editor-title-input{
+  flex:1;background:transparent;border:none;
+  color:var(--text);font-family:'Vazirmatn',sans-serif;
+  font-size:18px;font-weight:700;outline:none;
+  direction:rtl;
+}
+.editor-body{flex:1;display:flex;flex-direction:column;gap:8px;}
+.editor-textarea{flex:1;min-height:200px;}
+.tag-select{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;color:var(--text);
+  font-family:'Vazirmatn',sans-serif;font-size:13px;outline:none;
+}
+.editor-actions{display:flex;gap:8px;margin-top:8px;}
+
+/* ANALYZE RESULT */
+.analyze-btn{
+  background:linear-gradient(135deg,rgba(188,140,255,0.2),rgba(88,166,255,0.2));
+  border:1px solid rgba(188,140,255,0.4);
+  color:var(--purple);border-radius:8px;
+  padding:10px 16px;font-family:'Vazirmatn',sans-serif;
+  font-size:13px;cursor:pointer;width:100%;
+  font-weight:600;direction:rtl;margin-top:8px;
+  transition:all 0.2s;
+}
+.analyze-btn:active{opacity:0.8;}
+.analysis-result{
+  background:var(--surface2);border:1px solid rgba(188,140,255,0.3);
+  border-radius:var(--radius);padding:14px;margin-top:10px;
+  display:none;
+}
+.analysis-result.show{display:block;}
+.analysis-loading{
+  text-align:center;color:var(--muted);font-size:13px;
+  direction:rtl;padding:20px 0;
+}
+.analysis-loading .spin{
+  display:inline-block;font-size:24px;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.grammar-point{
+  background:var(--surface);border-radius:8px;
+  padding:12px;margin-bottom:8px;
+  border-left:3px solid var(--purple);
+}
+.grammar-point-title{
+  font-size:13px;font-weight:700;color:var(--purple);
+  margin-bottom:4px;
+}
+.grammar-point-text{
+  font-size:12px;color:var(--text);line-height:1.7;
+  direction:rtl;
+}
+
+/* ══════════════════════════════
+   SCREEN 2: VOCAB
+══════════════════════════════ */
+.vocab-search-row{display:flex;gap:8px;margin-bottom:12px;}
+.cat-scroll{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:8px;margin-bottom:12px;
+  scrollbar-width:none;
+}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.chip{
+  padding:5px 14px;border-radius:20px;font-size:12px;
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted);
+  white-space:nowrap;transition:all 0.2s;direction:rtl;
+  font-family:'Vazirmatn',sans-serif;
+}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#0d1117;font-weight:700;}
+
+.word-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:13px 14px;
+  margin-bottom:8px;cursor:pointer;transition:all 0.2s;
+}
+.word-item.expanded{border-color:rgba(88,166,255,0.4);}
+.word-top{display:flex;justify-content:space-between;align-items:center;}
+.word-de{font-size:16px;font-weight:700;}
+.word-article{font-size:11px;color:var(--gold);font-weight:700;margin-right:5px;}
+.word-fa{font-size:13px;color:var(--muted);margin-top:3px;direction:rtl;}
+.word-badge{
+  font-size:10px;padding:2px 7px;border-radius:8px;
+  background:rgba(227,179,65,0.15);color:var(--gold);
+  border:1px solid rgba(227,179,65,0.3);
+}
+.word-detail{
+  display:none;margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--border);
+}
+.word-item.expanded .word-detail{display:block;}
+.example-de{font-size:12px;color:var(--green);font-style:italic;margin-bottom:2px;}
+.example-fa{font-size:12px;color:var(--muted);direction:rtl;}
+.learned-btn{
+  margin-top:8px;padding:5px 12px;border-radius:16px;
+  background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);
+  color:var(--green);font-size:11px;cursor:pointer;
+  font-family:'Vazirmatn',sans-serif;direction:rtl;
+}
+.learned-btn.on{background:rgba(63,185,80,0.25);border-color:var(--green);}
+
+/* QUIZ */
+.quiz-container{max-width:400px;margin:0 auto;}
+.q-progress{display:flex;gap:3px;margin-bottom:16px;}
+.q-dot{flex:1;height:3px;border-radius:2px;background:var(--surface3);}
+.q-dot.done{background:var(--green);}
+.q-dot.now{background:var(--accent);}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:24px;text-align:center;
+  margin-bottom:16px;
+}
+.q-word{font-size:26px;font-weight:700;margin-bottom:6px;}
+.q-sub{font-size:12px;color:var(--muted);}
+.q-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.q-opt{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:13px 8px;
+  color:var(--text);font-size:13px;cursor:pointer;
+  font-family:'Vazirmatn',sans-serif;direction:rtl;
+  transition:all 0.2s;
+}
+.q-opt.correct{background:rgba(63,185,80,0.2);border-color:var(--green);color:var(--green);}
+.q-opt.wrong{background:rgba(247,129,102,0.2);border-color:var(--accent2);color:var(--accent2);}
+.q-result{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;text-align:center;
+}
+.q-score{font-size:56px;font-weight:700;color:var(--gold);}
+
+/* ══════════════════════════════
+   SCREEN 3: TEMPLATES
+══════════════════════════════ */
+.template-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;margin-bottom:10px;
+  cursor:pointer;transition:border-color 0.2s;
+}
+.template-card:active{border-color:var(--accent);}
+.tpl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.tpl-title{font-size:15px;font-weight:700;color:var(--text);}
+.tpl-type{
+  font-size:10px;padding:2px 8px;border-radius:8px;
+  background:rgba(247,129,102,0.15);color:var(--accent2);
+  border:1px solid rgba(247,129,102,0.3);
+}
+.tpl-desc{font-size:12px;color:var(--muted);direction:rtl;line-height:1.5;}
+.tpl-body{
+  display:none;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--border);
+}
+.template-card.open .tpl-body{display:block;}
+.tpl-text{
+  font-size:12px;color:var(--text);line-height:1.8;
+  background:var(--surface2);border-radius:8px;
+  padding:12px;white-space:pre-wrap;
+  border:1px solid var(--border);
+}
+.copy-btn{
+  margin-top:8px;padding:7px 14px;border-radius:8px;
+  background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);
+  color:var(--accent);font-size:12px;cursor:pointer;
+  font-family:'Vazirmatn',sans-serif;direction:rtl;
+}
+
+/* ══════════════════════════════
+   SCREEN 4: GRAMMAR
+══════════════════════════════ */
+.grammar-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:10px;overflow:hidden;
+}
+.grammar-header{
+  padding:14px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.grammar-name{font-size:15px;font-weight:700;color:var(--text);}
+.grammar-fa{font-size:12px;color:var(--muted);direction:rtl;margin-top:2px;}
+.grammar-arrow{color:var(--muted);transition:transform 0.2s;font-size:14px;}
+.grammar-card.open .grammar-arrow{transform:rotate(90deg);}
+.grammar-body{
+  display:none;padding:0 14px 14px;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+.grammar-card.open .grammar-body{display:block;}
+.rule-box{
+  background:var(--surface2);border-radius:8px;
+  padding:12px;margin-bottom:8px;
+  border-left:3px solid var(--accent);
+}
+.rule-title{font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px;text-transform:uppercase;}
+.rule-text{font-size:13px;color:var(--text);line-height:1.7;direction:rtl;}
+.example-row{
+  background:rgba(63,185,80,0.08);border-radius:8px;
+  padding:10px;margin-top:6px;
+  border:1px solid rgba(63,185,80,0.2);
+}
+.ex-de{font-size:13px;color:var(--green);font-style:italic;margin-bottom:3px;}
+.ex-fa{font-size:12px;color:var(--muted);direction:rtl;}
+.wrong-row{
+  background:rgba(247,129,102,0.08);border-radius:8px;
+  padding:10px;margin-top:6px;
+  border:1px solid rgba(247,129,102,0.2);
+}
+.ex-wrong{font-size:13px;color:var(--accent2);text-decoration:line-through;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(120px);
+  background:var(--green);color:#0d1117;
+  padding:10px 22px;border-radius:20px;
+  font-size:13px;font-weight:700;z-index:9999;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  direction:rtl;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* INSTALL */
+#install-bar{
+  display:none;background:linear-gradient(135deg,var(--accent),var(--purple));
+  padding:10px 14px;direction:rtl;
+  align-items:center;gap:8px;flex-shrink:0;
+}
+#install-bar.show{display:flex;}
+#install-bar p{flex:1;font-size:12px;color:#fff;}
+#install-bar button{
+  background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);
+  color:#fff;border-radius:6px;padding:5px 12px;
+  font-size:12px;cursor:pointer;font-family:'Vazirmatn',sans-serif;
+  white-space:nowrap;
+}
+</style>
+</head>
+<body>
+
+<div id="install-bar">
+  <button onclick="document.getElementById('install-bar').classList.remove('show')" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;">✕</button>
+  <p>DeutschMeister رو مثل اپ نصب کن!</p>
+  <button id="install-btn">نصب ▼</button>
+</div>
+
+<header class="header">
+  <div>
+    <div class="logo">DeutschMeister</div>
+    <div class="header-sub">دستیار یادگیری زبان آلمانی</div>
+  </div>
+  <div style="font-size:26px;">🇩🇪</div>
+</header>
+
+<div class="main">
+
+  <!-- NOTES -->
+  <div id="screen-notes" class="screen active">
+    <div id="notes-list-view">
+      <div class="notes-toolbar">
+        <input class="input" id="note-search" placeholder="🔍 جستجو در یادداشت‌ها..." oninput="renderNotes()" style="direction:rtl;"/>
+        <button class="btn btn-primary" onclick="openNewNote()" style="padding:10px 14px;white-space:nowrap;">+ جدید</button>
+      </div>
+      <div id="notes-filter" class="cat-scroll"></div>
+      <div id="notes-list"></div>
+    </div>
+    <div id="note-editor" class="note-editor">
+      <div class="editor-header">
+        <button class="btn btn-ghost" onclick="closeEditor()" style="padding:8px 12px;">← برگشت</button>
+        <input class="editor-title-input" id="editor-title" placeholder="عنوان یادداشت..."/>
+      </div>
+      <select class="tag-select" id="editor-tag" style="margin-bottom:8px;">
+        <option value="عمومی">📌 عمومی</option>
+        <option value="Forumsbeitrag">✍️ Forumsbeitrag</option>
+        <option value="Brief">✉️ Brief / نامه</option>
+        <option value="Beschwerde">⚠️ Beschwerde / شکایت</option>
+        <option value="Bewerbung">💼 Bewerbung / درخواست کار</option>
+        <option value="لغات">📚 لغات و عبارات</option>
+        <option value="گرامر">🔤 گرامر</option>
+        <option value="دیگر">📁 دیگر</option>
+      </select>
+      <div class="editor-body">
+        <textarea class="input editor-textarea" id="editor-body" placeholder="متن یادداشت را اینجا بنویس...&#10;&#10;می‌توانی متن آلمانی وارد کنی تا AI آن را تحلیل کند."></textarea>
+        <button class="analyze-btn" id="analyze-btn" onclick="analyzeText()">🤖 تحلیل هوشمند متن با AI ✨</button>
+        <div class="analysis-result" id="analysis-result"></div>
+      </div>
+      <div class="editor-actions">
+        <button class="btn btn-primary" onclick="saveNote()" style="flex:1;">💾 ذخیره</button>
+        <button class="btn btn-danger" onclick="deleteNote()" id="delete-btn" style="display:none;">🗑 حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOCAB -->
+  <div id="screen-vocab" class="screen">
+    <div id="vocab-main">
+      <div class="vocab-search-row">
+        <input class="input" id="vocab-search" placeholder="🔍 جستجو..." oninput="renderVocab()" style="direction:rtl;flex:1;"/>
+        <button class="btn btn-primary" onclick="showVocabAdd()" style="padding:10px 14px;white-space:nowrap;">+ لغت</button>
+      </div>
+      <div class="cat-scroll" id="vocab-cats"></div>
+      <div id="vocab-list"></div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-ghost" onclick="showQuiz()" style="width:100%;padding:13px;font-size:15px;">🧠 شروع کوییز</button>
+      </div>
+    </div>
+    <div id="vocab-add-form" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <button class="btn btn-ghost" onclick="hideVocabAdd()" style="padding:8px 12px;">← برگشت</button>
+        <span id="vocab-form-title" style="font-size:16px;font-weight:700;direction:rtl;">افزودن لغت جدید ✨</span>
+      </div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px;">
+          <input class="input" id="v-de" placeholder="لغت آلمانی *" />
+          <select class="input" id="v-art" style="cursor:pointer;">
+            <option value="">—</option>
+            <option value="der">der</option>
+            <option value="die">die</option>
+            <option value="das">das</option>
+          </select>
+        </div>
+        <input class="input" id="v-fa" placeholder="معنی فارسی *" style="direction:rtl;margin-bottom:8px;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <select class="input" id="v-type" style="cursor:pointer;">
+            <option value="Nomen">اسم</option>
+            <option value="Verb">فعل</option>
+            <option value="Adjektiv">صفت</option>
+            <option value="Adverb">قید</option>
+            <option value="Andere">دیگر</option>
+          </select>
+          <select class="input" id="v-cat" style="cursor:pointer;">
+            <option value="عمومی">عمومی</option>
+            <option value="کار">کار</option>
+            <option value="احساس">احساسات</option>
+            <option value="فناوری">فناوری</option>
+            <option value="سیاست">سیاست</option>
+            <option value="محیط">محیط زیست</option>
+            <option value="ارتباط">ارتباط</option>
+          </select>
+        </div>
+        <input class="input" id="v-ex" placeholder="مثال جمله (اختیاری)" style="margin-bottom:8px;" />
+        <input class="input" id="v-exfa" placeholder="ترجمه مثال (اختیاری)" style="direction:rtl;margin-bottom:12px;" />
+        <button id="vocab-save-btn" class="btn btn-primary" onclick="addVocab()" style="width:100%;padding:13px;">✅ افزودن لغت</button>
+      </div>
+    </div>
+    <div id="quiz-view" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button class="btn btn-ghost" onclick="hideQuiz()" style="padding:8px 12px;">← برگشت</button>
+        <span style="font-size:16px;font-weight:700;">کوییز لغات 🧠</span>
+      </div>
+      <div class="quiz-container">
+        <div id="quiz-setup-v">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:48px;margin-bottom:8px;">🧠</div>
+            <div style="font-size:13px;color:var(--muted);direction:rtl;">چند سوال؟</div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="chip active" onclick="setQN(this,10)">۱۰ سوال</button>
+            <button class="chip" onclick="setQN(this,20)">۲۰ سوال</button>
+            <button class="chip" onclick="setQN(this,30)">۳۰ سوال</button>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+            <button class="chip active" id="qm-de" onclick="setQM('de',this)">🇩🇪→فارسی</button>
+            <button class="chip" id="qm-fa" onclick="setQM('fa',this)">فارسی→🇩🇪</button>
+          </div>
+          <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="startQuiz()">شروع ▶</button>
+        </div>
+        <div id="quiz-active-v" style="display:none;">
+          <div class="q-progress" id="q-prog"></div>
+          <div class="q-card">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px;direction:rtl;" id="q-label"></div>
+            <div class="q-word" id="q-word"></div>
+            <div class="q-sub" id="q-hint"></div>
+          </div>
+          <div class="q-options" id="q-opts"></div>
+          <div style="text-align:center;margin-top:12px;">
+            <button class="btn btn-ghost" onclick="skipQ()" style="font-size:13px;">رد کردن ⏭</button>
+          </div>
+        </div>
+        <div id="quiz-result-v" style="display:none;">
+          <div class="q-result">
+            <div class="q-score" id="q-score-val">0</div>
+            <div style="color:var(--muted);font-size:18px;" id="q-score-of">از 10</div>
+            <div style="direction:rtl;margin:12px 0;font-size:15px;" id="q-msg"></div>
+            <button class="btn btn-primary" onclick="backToQuizSetup()" style="width:100%;margin-top:8px;">دوباره 🔄</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div id="screen-templates" class="screen">
+    <div style="font-size:13px;color:var(--muted);direction:rtl;margin-bottom:14px;">
+      نمونه متن‌های آلمانی — روی هر کارت کلیک کن تا باز بشه
+    </div>
+    <div id="templates-list"></div>
+  </div>
+
+  <!-- GRAMMAR -->
+  <div id="screen-grammar" class="screen">
+
+    <!-- Quick topic chips -->
+    <div class="cat-scroll" id="grammar-chips"></div>
+
+    <!-- Search box -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input class="input" id="grammar-input" placeholder="مثلاً: Konjunktiv II یا جملات شرطی..." style="direction:rtl;flex:1;"
+        onkeydown="if(event.key==='Enter')askGrammar()"/>
+      <button class="btn btn-primary" onclick="askGrammar()" style="padding:10px 14px;white-space:nowrap;">جستجو 🔍</button>
+    </div>
+
+    <!-- Result area -->
+    <div id="grammar-result"></div>
+
+    <!-- Saved explanations -->
+    <div id="grammar-saved-section" style="display:none;">
+      <div style="font-size:12px;color:var(--muted);direction:rtl;margin:16px 0 8px;border-top:1px solid var(--border);padding-top:12px;">
+        📌 توضیحات ذخیره شده
+      </div>
+      <div id="grammar-saved-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<nav class="nav">
+  <div class="nav-item active" onclick="showScreen('notes',this)">
+    <span class="nav-icon">📝</span>
+    <span>یادداشت‌ها</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('vocab',this)">
+    <span class="nav-icon">📚</span>
+    <span>لغات</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('templates',this)">
+    <span class="nav-icon">✍️</span>
+    <span>نمونه متن</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('grammar',this)">
+    <span class="nav-icon">🔤</span>
+    <span>گرامر</span>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════ DATA ══════════════
+const DEFAULT_VOCAB = [
+  {id:1,de:"die Absicht",article:"die",fa:"قصد، نیت",type:"Nomen",cat:"عمومی",ex:"Ich habe die Absicht, Deutsch zu lernen.",exFa:"قصد دارم آلمانی یاد بگیرم.",learned:false},
+  {id:2,de:"anspruchsvoll",article:"",fa:"سخت‌گیر، خواستار",type:"Adjektiv",cat:"عمومی",ex:"Diese Aufgabe ist sehr anspruchsvoll.",exFa:"این کار بسیار سخت است.",learned:false},
+  {id:3,de:"die Auswirkung",article:"die",fa:"تأثیر، پیامد",type:"Nomen",cat:"سیاست",ex:"Die Auswirkungen des Klimawandels sind spürbar.",exFa:"تأثیرات تغییر آب‌وهوا محسوس است.",learned:false},
+  {id:4,de:"berücksichtigen",article:"",fa:"در نظر گرفتن",type:"Verb",cat:"کار",ex:"Wir müssen alle Faktoren berücksichtigen.",exFa:"باید همه عوامل را در نظر گرفت.",learned:false},
+  {id:5,de:"die Herausforderung",article:"die",fa:"چالش",type:"Nomen",cat:"کار",ex:"Das ist eine große Herausforderung.",exFa:"این یک چالش بزرگ است.",learned:false},
+  {id:6,de:"gewährleisten",article:"",fa:"تضمین کردن",type:"Verb",cat:"کار",ex:"Wir müssen die Qualität gewährleisten.",exFa:"باید کیفیت را تضمین کنیم.",learned:false},
+  {id:7,de:"nachhaltig",article:"",fa:"پایدار",type:"Adjektiv",cat:"محیط",ex:"Nachhaltiges Handeln ist wichtig.",exFa:"رفتار پایدار اهمیت دارد.",learned:false},
+  {id:8,de:"die Perspektive",article:"die",fa:"دیدگاه، چشم‌انداز",type:"Nomen",cat:"عمومی",ex:"Aus meiner Perspektive ist das richtig.",exFa:"از دیدگاه من این درست است.",learned:false},
+  {id:9,de:"sich einsetzen",article:"",fa:"تلاش کردن برای",type:"Verb",cat:"سیاست",ex:"Er setzt sich für Gerechtigkeit ein.",exFa:"او برای عدالت تلاش می‌کند.",learned:false},
+  {id:10,de:"die Voraussetzung",article:"die",fa:"پیش‌شرط",type:"Nomen",cat:"کار",ex:"Das ist eine wichtige Voraussetzung.",exFa:"این یک پیش‌شرط مهم است.",learned:false},
+  {id:11,de:"eindeutig",article:"",fa:"واضح، صریح",type:"Adjektiv",cat:"عمومی",ex:"Die Antwort ist eindeutig falsch.",exFa:"جواب به وضوح اشتباه است.",learned:false},
+  {id:12,de:"die Zusammenarbeit",article:"die",fa:"همکاری",type:"Nomen",cat:"کار",ex:"Die Zusammenarbeit läuft sehr gut.",exFa:"همکاری خیلی خوب پیش می‌رود.",learned:false},
+  {id:13,de:"überwiegend",article:"",fa:"عمدتاً، بیشتر",type:"Adverb",cat:"عمومی",ex:"Die Bevölkerung ist überwiegend jung.",exFa:"جمعیت عمدتاً جوان است.",learned:false},
+  {id:14,de:"fördern",article:"",fa:"حمایت کردن، ترویج دادن",type:"Verb",cat:"سیاست",ex:"Die Regierung fördert erneuerbare Energien.",exFa:"دولت از انرژی‌های تجدیدپذیر حمایت می‌کند.",learned:false},
+  {id:15,de:"die Kompetenz",article:"die",fa:"شایستگی، صلاحیت",type:"Nomen",cat:"کار",ex:"Seine Kompetenz ist beeindruckend.",exFa:"شایستگی او چشمگیر است.",learned:false},
+];
+
+const TEMPLATES = [
+  {
+    title:"Forumsbeitrag – Meinung äußern",
+    type:"Forumsbeitrag",
+    desc:"نظر دادن در فروم — ساختار کامل با مقدمه، استدلال و نتیجه",
+    text:`Betreff: [Thema]
+
+Sehr geehrte Damen und Herren / Liebe Forumsteilnehmer,
+
+ich möchte meine Meinung zu diesem Thema äußern.
+
+Meiner Meinung nach / Ich bin der Ansicht, dass ...
+
+Einerseits ... Andererseits ...
+
+Ein weiterer wichtiger Aspekt ist, dass ...
+
+Als Beispiel möchte ich ... nennen.
+
+Alles in allem / Zusammenfassend lässt sich sagen, dass ...
+
+Mit freundlichen Grüßen
+[Name]`
+  },
+  {
+    title:"Beschwerdebrief – شکایت‌نامه رسمی",
+    type:"Brief",
+    desc:"نامه شکایت رسمی برای مشکلات خدمات یا محصولات",
+    text:`[Ort], [Datum]
+
+[Ihr Name]
+[Adresse]
+
+[Empfänger]
+[Adresse]
+
+Betreff: Beschwerde bezüglich [Thema]
+
+Sehr geehrte Damen und Herren,
+
+hiermit möchte ich mich über [Problem] beschweren.
+
+Am [Datum] habe ich [Produkt/Dienstleistung] erworben/genutzt. Leider musste ich feststellen, dass [Problem genau beschreiben].
+
+Dies ist für mich nicht akzeptabel, da [Begründung].
+
+Ich bitte Sie daher, [Forderung: Erstattung / Austausch / Stellungnahme] bis zum [Datum].
+
+Ich erwarte Ihre schriftliche Rückmeldung.
+
+Mit freundlichen Grüßen
+[Name]`
+  },
+  {
+    title:"Bewerbungsschreiben – Ausbildung",
+    type:"Bewerbung",
+    desc:"نامه درخواست آموزش حرفه‌ای (Ausbildung)",
+    text:`[Ort], [Datum]
+
+[Ihr Name]
+[Adresse]
+[E-Mail] | [Telefon]
+
+[Unternehmen]
+z. Hd. [Ansprechpartner]
+[Adresse]
+
+Betreff: Bewerbung um einen Ausbildungsplatz als [Beruf]
+
+Sehr geehrte Damen und Herren,
+
+mit großem Interesse habe ich Ihre Stellenanzeige gelesen und bewerbe mich hiermit um einen Ausbildungsplatz als [Beruf].
+
+Ich interessiere mich besonders für [Bereich], weil [Begründung].
+
+In meiner bisherigen Tätigkeit konnte ich bereits Erfahrungen in [Bereich] sammeln. Dabei habe ich [Fähigkeiten] entwickelt.
+
+Ich bin eine engagierte, lernbereite und zuverlässige Person. [Weitere Stärken].
+
+Über eine Einladung zu einem persönlichen Gespräch würde ich mich sehr freuen.
+
+Mit freundlichen Grüßen
+[Name]`
+  },
+  {
+    title:"E-Mail – Anfrage / سوال رسمی",
+    type:"E-Mail",
+    desc:"ایمیل رسمی برای درخواست اطلاعات یا راهنمایی",
+    text:`Betreff: Anfrage bezüglich [Thema]
+
+Sehr geehrte Damen und Herren,
+
+mein Name ist [Name] und ich wende mich an Sie mit einer Frage bezüglich [Thema].
+
+[Hintergrund erklären – چرا نوشتید]
+
+Ich wäre Ihnen sehr dankbar, wenn Sie mir [Frage] mitteilen könnten.
+
+Falls Sie weitere Informationen benötigen, stehe ich Ihnen gerne zur Verfügung.
+
+Vielen Dank im Voraus für Ihre Hilfe.
+
+Mit freundlichen Grüßen
+[Name]`
+  },
+  {
+    title:"Stellungnahme – موضع‌گیری",
+    type:"Forumsbeitrag",
+    desc:"نوشتن موضع‌گیری رسمی در مورد یک موضوع — مناسب آزمون B2",
+    text:`Thema: [Thema der Stellungnahme]
+
+In meiner Stellungnahme möchte ich mich mit dem Thema [Thema] auseinandersetzen.
+
+Zunächst möchte ich betonen, dass [Einleitung].
+
+Für [Position] spricht, dass [Argument 1]. Darüber hinaus [Argument 2].
+
+Allerdings darf man nicht vergessen, dass [Gegenargument].
+
+Dennoch bin ich der Meinung, dass [eigene Position], weil [Begründung].
+
+Abschließend lässt sich festhalten, dass [Zusammenfassung].`
+  },
+];
+
+// ══════════════ STATE ══════════════
+let notes = JSON.parse(localStorage.getItem('dm_notes')||'[]');
+let vocab = JSON.parse(localStorage.getItem('dm_vocab')||'null') || DEFAULT_VOCAB.map(w=>({...w}));
+let currentNoteId = null;
+let vocabFilter = 'همه';
+let noteFilter = 'همه';
+let qCount = 10, qMode = 'de', qList = [], qIdx = 0, qScore = 0, qAnswered = false;
+
+function save(){
+  localStorage.setItem('dm_notes', JSON.stringify(notes));
+  localStorage.setItem('dm_vocab', JSON.stringify(vocab));
+}
+
+// ══════════════ NAVIGATION ══════════════
+function showScreen(name, el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='notes') renderNotes();
+  if(name==='vocab') renderVocab();
+  if(name==='templates') renderTemplates();
+  if(name==='grammar') renderGrammar();
+}
+
+// ══════════════ NOTES ══════════════
+function getNoteCategories(){
+  const cats = ['همه',...new Set(notes.map(n=>n.tag))];
+  return cats;
+}
+function renderNoteFilters(){
+  const f = document.getElementById('notes-filter');
+  f.innerHTML = getNoteCategories().map(c=>
+    `<button class="chip ${c===noteFilter?'active':''}" onclick="setNoteFilter('${c}')">${c}</button>`
+  ).join('');
+}
+function setNoteFilter(c){noteFilter=c;renderNotes();}
+
+function renderNotes(){
+  renderNoteFilters();
+  const q = document.getElementById('note-search').value.toLowerCase();
+  let list = notes;
+  if(noteFilter!=='همه') list=list.filter(n=>n.tag===noteFilter);
+  if(q) list=list.filter(n=>n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q));
+  const el = document.getElementById('notes-list');
+  if(list.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--muted);direction:rtl;">
+      <div style="font-size:36px;margin-bottom:10px;">📝</div>
+      هنوز یادداشتی نداری<br/>روی + جدید کلیک کن
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map(n=>`
+    <div class="note-card" onclick="openNote(${n.id})">
+      <div class="note-header">
+        <div class="note-title">${n.title||'بدون عنوان'}</div>
+        <span class="note-tag">${n.tag}</span>
+      </div>
+      <div class="note-preview">${(n.body||'').slice(0,100)}${n.body&&n.body.length>100?'...':''}</div>
+      <div class="note-date">${new Date(n.date).toLocaleDateString('fa-IR')}</div>
+    </div>
+  `).join('');
+}
+
+function openNewNote(){
+  currentNoteId = null;
+  document.getElementById('editor-title').value='';
+  document.getElementById('editor-body').value='';
+  document.getElementById('editor-tag').value='عمومی';
+  document.getElementById('analysis-result').classList.remove('show');
+  document.getElementById('analysis-result').innerHTML='';
+  document.getElementById('delete-btn').style.display='none';
+  document.getElementById('notes-list-view').style.display='none';
+  document.getElementById('note-editor').classList.add('open');
+}
+
+function openNote(id){
+  const n = notes.find(x=>x.id===id);
+  if(!n) return;
+  currentNoteId = id;
+  document.getElementById('editor-title').value=n.title;
+  document.getElementById('editor-body').value=n.body;
+  document.getElementById('editor-tag').value=n.tag;
+  document.getElementById('analysis-result').classList.remove('show');
+  document.getElementById('analysis-result').innerHTML='';
+  document.getElementById('delete-btn').style.display='block';
+  document.getElementById('notes-list-view').style.display='none';
+  document.getElementById('note-editor').classList.add('open');
+}
+
+function closeEditor(){
+  document.getElementById('note-editor').classList.remove('open');
+  document.getElementById('notes-list-view').style.display='block';
+  renderNotes();
+}
+
+function saveNote(){
+  const title = document.getElementById('editor-title').value.trim();
+  const body = document.getElementById('editor-body').value.trim();
+  const tag = document.getElementById('editor-tag').value;
+  if(!body){toast('❗ متن یادداشت خالی است');return;}
+  if(currentNoteId){
+    const n = notes.find(x=>x.id===currentNoteId);
+    if(n){n.title=title||'بدون عنوان';n.body=body;n.tag=tag;n.date=Date.now();}
+  } else {
+    notes.unshift({id:Date.now(),title:title||'بدون عنوان',body,tag,date:Date.now()});
+  }
+  save();
+  toast('✅ ذخیره شد!');
+  closeEditor();
+}
+
+function deleteNote(){
+  if(!currentNoteId) return;
+  if(!confirm('حذف شود؟')) return;
+  notes = notes.filter(n=>n.id!==currentNoteId);
+  save();
+  toast('🗑 حذف شد');
+  closeEditor();
+}
+
+// ══════════════ AI ANALYZE ══════════════
+async function analyzeText(){
+  const text = document.getElementById('editor-body').value.trim();
+  if(!text || text.length < 20){toast('❗ متن باید حداقل ۲۰ کاراکتر باشد');return;}
+  
+  const resultEl = document.getElementById('analysis-result');
+  resultEl.classList.add('show');
+  resultEl.innerHTML=`<div class="analysis-loading"><span class="spin">⚙️</span><br/>در حال تحلیل متن...</div>`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        system:`تو یک معلم حرفه‌ای زبان آلمانی هستی که به فارسی توضیح می‌دهی. وظیفه‌ات تحلیل متن آلمانی است. متن داده شده را تحلیل کن و نکات گرامری مهم را به فارسی توضیح بده. 
+
+فقط JSON برگردان — بدون هیچ توضیح یا backtick:
+{
+  "level": "سطح تخمینی متن مثلاً B1/B2",
+  "points": [
+    {
+      "title": "نام قاعده گرامری",
+      "explanation": "توضیح کوتاه به فارسی — چه قاعده‌ای استفاده شده و چرا"
+    }
+  ],
+  "tip": "یک نکته مهم یادگیری برای این متن به فارسی"
+}
+
+حداکثر ۴ نکته گرامری بنویس. اگر متن فارسی یا انگلیسی بود بگو متن باید آلمانی باشد.`,
+        messages:[{role:"user",content:`این متن را تحلیل کن:\n\n${text}`}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(c=>c.type==='text')?.text||'{}';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    
+    let html = `<div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:10px;direction:rtl;">
+      🤖 تحلیل هوشمند | سطح: <span style="color:var(--gold)">${parsed.level||'نامشخص'}</span>
+    </div>`;
+    
+    (parsed.points||[]).forEach(p=>{
+      html+=`<div class="grammar-point">
+        <div class="grammar-point-title">📌 ${p.title}</div>
+        <div class="grammar-point-text">${p.explanation}</div>
+      </div>`;
+    });
+    
+    if(parsed.tip){
+      html+=`<div style="background:rgba(88,166,255,0.08);border-radius:8px;padding:10px;border:1px solid rgba(88,166,255,0.2);margin-top:4px;">
+        <div style="font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px;">💡 نکته یادگیری</div>
+        <div style="font-size:12px;color:var(--text);direction:rtl;line-height:1.6">${parsed.tip}</div>
+      </div>`;
+    }
+    resultEl.innerHTML = html;
+  } catch(e){
+    resultEl.innerHTML=`<div style="color:var(--accent2);direction:rtl;font-size:13px;">❌ خطا در اتصال به AI. اینترنت را بررسی کن.</div>`;
+  }
+}
+
+// ══════════════ VOCAB ══════════════
+function renderVocab(){
+  const cats = ['همه',...new Set(vocab.map(w=>w.cat))];
+  document.getElementById('vocab-cats').innerHTML = cats.map(c=>
+    `<button class="chip ${c===vocabFilter?'active':''}" onclick="setVF('${c}')">${c}</button>`
+  ).join('');
+  const q = document.getElementById('vocab-search').value.toLowerCase();
+  let list = vocab;
+  if(vocabFilter!=='همه') list=list.filter(w=>w.cat===vocabFilter);
+  if(q) list=list.filter(w=>w.de.toLowerCase().includes(q)||w.fa.includes(q));
+  const el = document.getElementById('vocab-list');
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted);">لغتی پیدا نشد</div>`;return;}
+  el.innerHTML = list.map(w=>`
+    <div class="word-item ${w.learned?'expanded':''}" id="wi-${w.id}" onclick="toggleWord(${w.id})">
+      <div class="word-top">
+        <div>
+          ${w.article?`<span class="word-article">${w.article}</span>`:''}
+          <span class="word-de">${w.de.replace(w.article+' ','').trim()}</span>
+        </div>
+        <span class="word-badge">${w.type}</span>
+      </div>
+      <div class="word-fa">${w.fa}</div>
+      <div class="word-detail">
+        ${w.ex?`<div class="example-de">${w.ex}</div><div class="example-fa">${w.exFa||''}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button class="learned-btn ${w.learned?'on':''}" onclick="toggleLearned(event,${w.id})">
+            ${w.learned?'✅ یاد گرفتم':'☑ علامت‌گذاری'}
+          </button>
+          <button class="learned-btn" onclick="editVocab(event,${w.id})" style="background:rgba(88,166,255,0.1);border-color:rgba(88,166,255,0.3);color:var(--accent);">✏️ ویرایش</button>
+          <button class="learned-btn" onclick="deleteVocab(event,${w.id})" style="background:rgba(247,129,102,0.1);border-color:rgba(247,129,102,0.3);color:var(--accent2);">🗑 حذف</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setVF(c){vocabFilter=c;renderVocab();}
+function toggleWord(id){
+  document.getElementById('wi-'+id)?.classList.toggle('expanded');
+}
+function toggleLearned(e,id){
+  e.stopPropagation();
+  const w=vocab.find(x=>x.id===id);
+  if(w){w.learned=!w.learned;save();renderVocab();toast(w.learned?'✅ یاد گرفتی!':'↩ برداشته شد');}
+}
+function deleteVocab(e,id){
+  e.stopPropagation();
+  if(!confirm('این لغت حذف شود؟')) return;
+  vocab = vocab.filter(x=>x.id!==id);
+  save();renderVocab();toast('🗑 حذف شد');
+}
+function editVocab(e,id){
+  e.stopPropagation();
+  const w = vocab.find(x=>x.id===id);
+  if(!w) return;
+  // پر کردن فرم با اطلاعات لغت
+  document.getElementById('v-de').value = w.de;
+  document.getElementById('v-fa').value = w.fa;
+  document.getElementById('v-art').value = w.article||'';
+  document.getElementById('v-type').value = w.type||'Nomen';
+  document.getElementById('v-cat').value = w.cat||'عمومی';
+  document.getElementById('v-ex').value = w.ex||'';
+  document.getElementById('v-exfa').value = w.exFa||'';
+  // ذخیره ID برای ویرایش
+  document.getElementById('vocab-add-form').dataset.editId = id;
+  document.getElementById('vocab-form-title').textContent = '✏️ ویرایش لغت';
+  document.getElementById('vocab-save-btn').textContent = '✅ ذخیره تغییرات';
+  showVocabAdd();
+}
+function showVocabAdd(){
+  document.getElementById('vocab-main').style.display='none';
+  document.getElementById('vocab-add-form').style.display='block';
+}
+function hideVocabAdd(){
+  document.getElementById('vocab-main').style.display='block';
+  document.getElementById('vocab-add-form').style.display='none';
+}
+function addVocab(){
+  const de=document.getElementById('v-de').value.trim();
+  const fa=document.getElementById('v-fa').value.trim();
+  if(!de||!fa){toast('❗ لغت و معنی الزامی');return;}
+  const form=document.getElementById('vocab-add-form');
+  const editId=form.dataset.editId;
+  if(editId){
+    const w=vocab.find(x=>x.id===parseInt(editId));
+    if(w){
+      w.de=de;w.fa=fa;
+      w.article=document.getElementById('v-art').value;
+      w.type=document.getElementById('v-type').value;
+      w.cat=document.getElementById('v-cat').value;
+      w.ex=document.getElementById('v-ex').value.trim();
+      w.exFa=document.getElementById('v-exfa').value.trim();
+    }
+    delete form.dataset.editId;
+    document.getElementById('vocab-form-title').textContent='افزودن لغت جدید ✨';
+    document.getElementById('vocab-save-btn').textContent='✅ افزودن لغت';
+    toast('✅ ویرایش ذخیره شد!');
+  } else {
+    vocab.unshift({
+      id:Date.now(),de,fa,
+      article:document.getElementById('v-art').value,
+      type:document.getElementById('v-type').value,
+      cat:document.getElementById('v-cat').value,
+      ex:document.getElementById('v-ex').value.trim(),
+      exFa:document.getElementById('v-exfa').value.trim(),
+      learned:false
+    });
+    toast('✅ لغت اضافه شد!');
+  }
+  save();
+  ['v-de','v-fa','v-ex','v-exfa'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('v-art').value='';
+  hideVocabAdd();
+  renderVocab();
+}
+
+// ══════════════ QUIZ ══════════════
+function showQuiz(){document.getElementById('vocab-main').style.display='none';document.getElementById('quiz-view').style.display='block';}
+function hideQuiz(){document.getElementById('quiz-view').style.display='none';document.getElementById('vocab-main').style.display='block';}
+function backToQuizSetup(){
+  document.getElementById('quiz-active-v').style.display='none';
+  document.getElementById('quiz-result-v').style.display='none';
+  document.getElementById('quiz-setup-v').style.display='block';
+}
+function setQN(btn,n){
+  qCount=n;
+  document.querySelectorAll('#quiz-setup-v .chip').forEach(c=>{
+    if(['۱۰ سوال','۲۰ سوال','۳۰ سوال'].includes(c.textContent)) c.classList.remove('active');
+  });
+  btn.classList.add('active');
+}
+function setQM(m,btn){
+  qMode=m;
+  document.getElementById('qm-de').classList.toggle('active',m==='de');
+  document.getElementById('qm-fa').classList.toggle('active',m==='fa');
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5);}
+function startQuiz(){
+  if(vocab.length<4){toast('❗ حداقل ۴ لغت لازم است');return;}
+  qList=shuffle(vocab).slice(0,Math.min(qCount,vocab.length));
+  qIdx=0;qScore=0;qAnswered=false;
+  document.getElementById('quiz-setup-v').style.display='none';
+  document.getElementById('quiz-result-v').style.display='none';
+  document.getElementById('quiz-active-v').style.display='block';
+  renderQ();
+}
+function renderQ(){
+  if(qIdx>=qList.length){showQResult();return;}
+  qAnswered=false;
+  const q=qList[qIdx];
+  document.getElementById('q-prog').innerHTML=qList.map((_,i)=>
+    `<div class="q-dot ${i<qIdx?'done':i===qIdx?'now':''}"></div>`).join('');
+  if(qMode==='de'){
+    document.getElementById('q-label').textContent='معنی فارسی این لغت؟';
+    document.getElementById('q-word').textContent=(q.article?q.article+' ':'')+q.de.replace(q.article+' ','').trim();
+    document.getElementById('q-hint').textContent=q.type;
+  } else {
+    document.getElementById('q-label').textContent='کدام لغت آلمانی درست است؟';
+    document.getElementById('q-word').textContent=q.fa;
+    document.getElementById('q-hint').textContent='';
+  }
+  const others=shuffle(vocab.filter(w=>w.id!==q.id)).slice(0,3);
+  const opts=shuffle([q,...others]);
+  document.getElementById('q-opts').innerHTML=opts.map(o=>{
+    const val=qMode==='de'?o.fa:((o.article?o.article+' ':'')+o.de.replace(o.article+' ','').trim());
+    const correct=qMode==='de'?q.fa:((q.article?q.article+' ':'')+q.de.replace(q.article+' ','').trim());
+    return `<button class="q-opt" onclick="selectOpt(this,'${val.replace(/'/g,"\\'")}','${correct.replace(/'/g,"\\'")}',${q.id})">${val}</button>`;
+  }).join('');
+}
+function selectOpt(btn,selected,correct,qId){
+  if(qAnswered)return;
+  qAnswered=true;
+  const ok=selected===correct;
+  if(ok){btn.classList.add('correct');qScore++;}
+  else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.q-opt').forEach(b=>{if(b.textContent.trim()===correct)b.classList.add('correct');});
+  }
+  setTimeout(()=>{qIdx++;renderQ();},1100);
+}
+function skipQ(){qIdx++;renderQ();}
+function showQResult(){
+  document.getElementById('quiz-active-v').style.display='none';
+  document.getElementById('quiz-result-v').style.display='block';
+  document.getElementById('q-score-val').textContent=qScore;
+  document.getElementById('q-score-of').textContent='از '+qList.length;
+  const p=qScore/qList.length;
+  document.getElementById('q-msg').textContent=p>=0.8?'🎉 عالی! آفرین!':p>=0.6?'👍 خوب بود، ادامه بده!':'💪 تمرین بیشتری لازم است';
+}
+
+// ══════════════ TEMPLATES ══════════════
+function renderTemplates(){
+  document.getElementById('templates-list').innerHTML = TEMPLATES.map((t,i)=>`
+    <div class="template-card" id="tpl-${i}" onclick="toggleTpl(${i})">
+      <div class="tpl-header">
+        <div class="tpl-title">${t.title}</div>
+        <span class="tpl-type">${t.type}</span>
+      </div>
+      <div class="tpl-desc">${t.desc}</div>
+      <div class="tpl-body">
+        <div class="tpl-text">${t.text}</div>
+        <button class="copy-btn" onclick="copyTpl(event,${i})">📋 کپی متن</button>
+        <button class="copy-btn" onclick="useTemplate(event,${i})" style="margin-right:8px;background:rgba(63,185,80,0.15);border-color:rgba(63,185,80,0.3);color:var(--green);">✍️ استفاده در یادداشت</button>
+      </div>
+    </div>
+  `).join('');
+}
+function toggleTpl(i){document.getElementById('tpl-'+i)?.classList.toggle('open');}
+function copyTpl(e,i){e.stopPropagation();navigator.clipboard?.writeText(TEMPLATES[i].text)||'';toast('📋 کپی شد!');}
+function useTemplate(e,i){
+  e.stopPropagation();
+  const t=TEMPLATES[i];
+  currentNoteId=null;
+  document.getElementById('editor-title').value=t.title;
+  document.getElementById('editor-body').value=t.text;
+  document.getElementById('editor-tag').value=t.type==='Forumsbeitrag'?'Forumsbeitrag':t.type==='Brief'?'Brief':t.type==='Bewerbung'?'Bewerbung':'عمومی';
+  document.getElementById('analysis-result').classList.remove('show');
+  document.getElementById('delete-btn').style.display='none';
+  // switch to notes
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-notes').classList.add('active');
+  document.querySelector('.nav-item').classList.add('active');
+  document.getElementById('notes-list-view').style.display='none';
+  document.getElementById('note-editor').classList.add('open');
+  toast('✅ قالب در یادداشت باز شد!');
+}
+
+// ══════════════ GRAMMAR AI ══════════════
+const GRAMMAR_TOPICS = [
+  {label:"A1 – Präsens",q:"Präsens A1 تصریف افعال در زمان حال"},
+  {label:"A1 – Artikel",q:"حروف تعریف der die das در آلمانی A1"},
+  {label:"A1 – Verneinung",q:"nicht و kein نفی در آلمانی A1"},
+  {label:"A2 – Perfekt",q:"Perfekt زمان گذشته مکالمه‌ای A2"},
+  {label:"A2 – Modalverben",q:"افعال وجهی können müssen dürfen A2"},
+  {label:"A2 – Akkusativ/Dativ",q:"حالت‌های Akkusativ و Dativ در آلمانی A2"},
+  {label:"B1 – Nebensätze",q:"جملات فرعی weil dass wenn در B1"},
+  {label:"B1 – Präteritum",q:"Präteritum گذشته نوشتاری B1"},
+  {label:"B1 – Komparativ",q:"مقایسه Komparativ Superlativ در B1"},
+  {label:"B2 – Konjunktiv II",q:"Konjunktiv II وجه شرطی B2"},
+  {label:"B2 – Passiv",q:"ساختار Passiv مجهول در B2"},
+  {label:"B2 – Relativsätze",q:"جملات وصفی Relativsätze در B2"},
+  {label:"B2 – Infinitivkonstruktionen",q:"ساختارهای um zu ohne zu anstatt zu در B2"},
+  {label:"B2 – Konnektoren",q:"کلمات ربط Konnektoren پیشرفته B2"},
+  {label:"C1 – Konjunktiv I",q:"Konjunktiv I نقل قول غیرمستقیم C1"},
+  {label:"C1 – Nominalisierung",q:"Nominalisierung اسم‌سازی از فعل و صفت C1"},
+  {label:"C1 – Partizipialkonstruktionen",q:"Partizipialkonstruktionen جملات مشارکتی C1"},
+  {label:"C2 – Stilmittel",q:"Stilmittel ابزارهای سبکی نوشتاری C2"},
+];
+
+let grammarSaved = JSON.parse(localStorage.getItem('dm_grammar_saved')||'[]');
+
+function renderGrammar(){
+  // chips
+  document.getElementById('grammar-chips').innerHTML = GRAMMAR_TOPICS.map((t,i)=>
+    `<button class="chip" onclick="quickGrammar(${i})">${t.label}</button>`
+  ).join('');
+  // saved
+  renderGrammarSaved();
+  // welcome
+  document.getElementById('grammar-result').innerHTML = `
+    <div style="text-align:center;padding:24px 16px;color:var(--muted);">
+      <div style="font-size:40px;margin-bottom:10px;">🔤</div>
+      <div style="direction:rtl;font-size:14px;line-height:1.8;color:var(--text);">
+        از چیپ‌های بالا یه موضوع انتخاب کن<br/>یا هر سوال گرامری بنویس
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px;direction:rtl;">
+        پوشش کامل A1 تا C2
+      </div>
+    </div>`;
+}
+
+function quickGrammar(i){
+  const g = {idx:i, ...GRAMMAR_DB[i]};
+  document.getElementById('grammar-input').value = g.title;
+  showGrammarCard(g);
+}
+
+const GRAMMAR_DB = {
+  0:{title:"Präsens",level:"A1",summary:"زمان حال — برای بیان عادات، حقایق و اتفاقات جاری",
+    rules:[
+      {title:"تصریف منظم",text:"پسوند فعل بر اساس ضمیر تغییر می‌کند:\nich → -e (ich lerne)\ndu → -st (du lernst)\ner/sie/es → -t (er lernt)\nwir → -en (wir lernen)\nihr → -t (ihr lernt)\nSie/sie → -en (Sie lernen)"},
+      {title:"افعال بی‌قاعده مهم",text:"sein: ich bin, du bist, er ist, wir sind\nhaben: ich habe, du hast, er hat\nwerden: ich werde, du wirst, er wird"}
+    ],
+    examples:[{de:"Ich lerne jeden Tag Deutsch.",fa:"هر روز آلمانی یاد می‌گیرم."},{de:"Er ist Lehrer.",fa:"او معلم است."},{de:"Wir haben Zeit.",fa:"ما وقت داریم."}],
+    mistakes:[{wrong:"Ich lerne nicht jeden Tag.",note:"✅ این درست است! nicht بعد از فعل می‌آید."},{wrong:"Er ist ein Lehrer. (با Beruf)",note:"با مشاغل بدون حرف تعریف: Er ist Lehrer."}],
+    tip:"پسوند -st برای du همیشه ثابت است — حتی در افعال بی‌قاعده: du bist, du hast, du wirst"},
+  1:{title:"Artikel (der/die/das/ein/eine)",level:"A1",summary:"حروف تعریف معین و نامعین — یکی از سخت‌ترین بخش‌های آلمانی",
+    rules:[
+      {title:"حروف تعریف معین",text:"der → مذکر (der Mann, der Tisch)\ndie → مؤنث (die Frau, die Tür)\ndas → خنثی (das Kind, das Buch)\ndie → جمع (die Männer, die Frauen)"},
+      {title:"حروف تعریف نامعین",text:"ein → مذکر و خنثی (ein Mann, ein Kind)\neine → مؤنث (eine Frau)\nkein/keine → نفی (kein Mann, keine Frau)"}
+    ],
+    examples:[{de:"Der Mann ist nett.",fa:"مرد مهربان است."},{de:"Ich habe ein Buch.",fa:"یک کتاب دارم."},{de:"Das ist keine gute Idee.",fa:"این ایده‌ی خوبی نیست."}],
+    mistakes:[{wrong:"Ich habe ein Kind. → Akkusativ: Ich habe ein Kind.",note:"✅ ein/eine در Akkusativ برای مذکر به einen تبدیل می‌شود: Ich sehe einen Mann."},{wrong:"Das Haus ist groß. / Das ist ein Haus.",note:"✅ هر دو درست — das در اول جمله می‌تواند ضمیر اشاره باشد."}],
+    tip:"جنس اسم‌ها را باید حفظ کرد — هیچ قانون کلی وجود ندارد. همیشه اسم + حرف تعریف را با هم یاد بگیر!"},
+  2:{title:"Verneinung mit nicht / kein",level:"A1",summary:"نفی جمله — با nicht یا kein",
+    rules:[
+      {title:"nicht",text:"برای نفی فعل، صفت یا قید استفاده می‌شود.\nمعمولاً در آخر جمله یا قبل از کلمه‌ای که نفی می‌کند:\nIch komme nicht. / Das ist nicht gut."},
+      {title:"kein/keine",text:"برای نفی اسم با حرف تعریف نامعین یا بدون حرف تعریف:\nIch habe kein Auto. (= Ich habe nicht ein Auto)\nIch habe keine Zeit."}
+    ],
+    examples:[{de:"Ich verstehe das nicht.",fa:"این را نمی‌فهمم."},{de:"Er hat kein Geld.",fa:"او پول ندارد."},{de:"Das ist nicht richtig.",fa:"این درست نیست."}],
+    mistakes:[{wrong:"Ich habe nicht ein Auto.",note:"❌ با اسم نامعین از kein استفاده کن: Ich habe kein Auto."},{wrong:"Ich nicht komme.",note:"❌ nicht قبل از فعل اصلی نمی‌آید (در جمله اصلی): Ich komme nicht."}],
+    tip:"قانون ساده: قبل از اسم → kein | بقیه موارد → nicht"},
+  3:{title:"Perfekt",level:"A2",summary:"گذشته‌ی مکالمه‌ای — برای صحبت از گذشته در محاوره",
+    rules:[
+      {title:"ساختار",text:"haben/sein (در زمان حال) + Partizip II\nich habe gespielt / ich bin gegangen"},
+      {title:"haben یا sein؟",text:"sein: افعال حرکتی (gehen, kommen, fahren, laufen) و تغییر حال (werden, sterben, einschlafen)\nهمه افعال دیگر با haben"},
+      {title:"Partizip II",text:"منظم: ge + stamm + t → gemacht, gespielt, gelernt\nنامنظم: باید حفظ شود → gegangen, geschrieben, gesehen"}
+    ],
+    examples:[{de:"Ich habe gestern Fußball gespielt.",fa:"دیروز فوتبال بازی کردم."},{de:"Sie ist nach Berlin gefahren.",fa:"او به برلین رفت."},{de:"Wir haben einen Film gesehen.",fa:"یک فیلم دیدیم."}],
+    mistakes:[{wrong:"Ich bin gegessen.",note:"❌ essen با haben: Ich habe gegessen."},{wrong:"Er hat gegangen.",note:"❌ gehen با sein: Er ist gegangen."}],
+    tip:"حرکت + مقصد → sein | بقیه → haben. شک داری؟ haben احتمالاً درست‌تره!"},
+  4:{title:"Modalverben",level:"A2",summary:"افعال وجهی — برای بیان توانایی، اجازه، ضرورت و خواسته",
+    rules:[
+      {title:"افعال وجهی اصلی",text:"können → توانستن (ich kann)\nmüssen → مجبور بودن (ich muss)\ndürfen → اجازه داشتن (ich darf)\nwollen → خواستن (ich will)\nsollen → باید (از طرف دیگری) (ich soll)\nmöchten → دوست داشتن (ich möchte)"},
+      {title:"ساختار جمله",text:"فعل وجهی در جایگاه دوم + مصدر در آخر جمله:\nIch kann Deutsch sprechen.\nSie muss heute arbeiten."}
+    ],
+    examples:[{de:"Kannst du mir helfen?",fa:"می‌توانی به من کمک کنی؟"},{de:"Du musst das Formular ausfüllen.",fa:"باید این فرم را پر کنی."},{de:"Ich möchte einen Kaffee.",fa:"یک قهوه می‌خواهم."}],
+    mistakes:[{wrong:"Ich kann sprechen Deutsch.",note:"❌ مصدر همیشه به آخر جمله می‌رود: Ich kann Deutsch sprechen."},{wrong:"Ich muss nicht kommen. (= I don't have to)",note:"✅ این درست است — müssen + nicht = مجبور نیستی. برای ممنوع: darf nicht"}],
+    tip:"müssen nicht = مجبور نیستی | darf nicht = نباید (ممنوع است) — این تفاوت بسیار مهم است!"},
+  5:{title:"Akkusativ und Dativ",level:"A2",summary:"حالت‌های دستوری — مفعول مستقیم و غیرمستقیم",
+    rules:[
+      {title:"Akkusativ (مفعول مستقیم)",text:"جواب سوال wen? / was? را می‌دهد.\nتغییر فقط در مذکر: der → den / ein → einen\nIch sehe den Mann. / Ich kaufe einen Tisch."},
+      {title:"Dativ (مفعول غیرمستقیم)",text:"جواب سوال wem? را می‌دهد.\nder/ein → dem/einem | die/eine → der/einer | das/ein → dem/einem\nIch helfe dem Mann. / Ich gebe einer Frau das Buch."},
+      {title:"حروف اضافه مهم",text:"Akkusativ: durch, für, gegen, ohne, um\nDativ: aus, bei, mit, nach, seit, von, zu, gegenüber"}
+    ],
+    examples:[{de:"Ich kaufe den Tisch. (Akk)",fa:"میز را می‌خرم."},{de:"Ich helfe dem Kind. (Dat)",fa:"به بچه کمک می‌کنم."},{de:"Das Geschenk ist für dich. (Akk)",fa:"هدیه برای توست."}],
+    mistakes:[{wrong:"Ich helfe den Mann.",note:"❌ helfen حرف اضافه Dativ می‌گیرد: Ich helfe dem Mann."},{wrong:"Mit dem Bus fahre ich. → Mit den Bus",note:"❌ mit همیشه Dativ: mit dem Bus (مذکر)"}],
+    tip:"این حروف اضافه همیشه Dativ: aus bei mit nach seit von zu — حفظشان کن!"},
+  6:{title:"Nebensätze (weil / dass / wenn)",level:"B1",summary:"جملات فرعی — فعل به انتهای جمله می‌رود",
+    rules:[
+      {title:"قانون اصلی",text:"در جمله فرعی فعل صرف‌شده به آخر می‌رود!\nweil (چون): Ich lerne Deutsch, weil ich in Deutschland arbeiten möchte.\ndass (که): Ich denke, dass das richtig ist.\nwenn (وقتی/اگر): Wenn ich Zeit habe, lerne ich."},
+      {title:"ترتیب کلمات",text:"جمله اصلی + کاما +接続詞 + ... + فعل\nیا:接続詞 + ... + فعل + کاما + فعل + جمله اصلی\nWeil es regnet, bleibe ich zu Hause."}
+    ],
+    examples:[{de:"Er kommt nicht, weil er krank ist.",fa:"نمی‌آید چون مریض است."},{de:"Ich weiß, dass sie Recht hat.",fa:"می‌دانم که او حق دارد."},{de:"Wenn ich Geld hätte, würde ich reisen.",fa:"اگر پول داشتم، سفر می‌کردم."}],
+    mistakes:[{wrong:"Ich lerne Deutsch, weil ich möchte in Deutschland arbeiten.",note:"❌ فعل وجهی هم به آخر می‌رود: weil ich in Deutschland arbeiten möchte."},{wrong:"Obwohl es schwer ist, aber ich lerne.",note:"❌ بعد از obwohl نباید aber بیاید!"}],
+    tip:"جمله فرعی = جزیره‌ای که فعل آخر است. تصور کن فعل را به آخر هل می‌دهی!"},
+  7:{title:"Präteritum",level:"B1",summary:"گذشته‌ی نوشتاری — در متن، داستان و روزنامه",
+    rules:[
+      {title:"افعال منظم",text:"stamm + te + پسوند\nich machte, du machtest, er machte\nwir machten, ihr machtet, sie machten"},
+      {title:"افعال بی‌قاعده مهم",text:"sein: war, warst, war, waren\nhaben: hatte, hattest, hatte, hatten\ngehen: ging | kommen: kam | sehen: sah\nsagen: sagte | geben: gab | nehmen: nahm"}
+    ],
+    examples:[{de:"Als ich jung war, lebte ich in Iran.",fa:"وقتی جوان بودم، در ایران زندگی می‌کردم."},{de:"Er kam gestern an.",fa:"دیروز رسید."},{de:"Sie hatte keine Zeit.",fa:"وقت نداشت."}],
+    mistakes:[{wrong:"Ich war gegangen. (Plusquamperfekt نیاز نیست)",note:"برای سادگی در B1 از Präteritum یا Perfekt استفاده کن."},{wrong:"Er geht-te",note:"❌ افعال بی‌قاعده پسوند -te نمی‌گیرند — باید حفظ شوند."}],
+    tip:"در مکالمه روزمره از Perfekt استفاده کن. Präteritum برای نوشتن و داستان است."},
+  8:{title:"Komparativ und Superlativ",level:"B1",summary:"مقایسه — بهتر، بهترین",
+    rules:[
+      {title:"Komparativ",text:"صفت + -er + als\nschnell → schneller als\ngut → besser als (بی‌قاعده)\nviel → mehr als\ngern → lieber als"},
+      {title:"Superlativ",text:"am + صفت + -sten\nschnell → am schnellsten\ngut → am besten\nviel → am meisten\ngern → am liebsten"}
+    ],
+    examples:[{de:"Berlin ist größer als Frankfurt.",fa:"برلین از فرانکفورت بزرگ‌تر است."},{de:"Das ist das beste Restaurant hier.",fa:"این بهترین رستوران اینجاست."},{de:"Ich lerne am liebsten morgens.",fa:"بیشتر از همه صبح‌ها یاد می‌گیرم."}],
+    mistakes:[{wrong:"mehr schnell",note:"❌ در آلمانی mehr + صفت نداریم — پسوند -er اضافه می‌کنیم: schneller"},{wrong:"Sie ist so alt wie ich.",note:"✅ این درست است! برابری با so...wie بیان می‌شود."}],
+    tip:"gut/viel/gern بی‌قاعده‌اند — besser/mehr/lieber — حتماً حفظ کن!"},
+  9:{title:"Konjunktiv II",level:"B2",summary:"وجه شرطی — برای ادب، آرزو و جملات شرطی",
+    rules:[
+      {title:"ساختار با würde",text:"würde + Infinitiv — برای اکثر افعال\nIch würde gerne reisen.\nSie würden das nicht machen."},
+      {title:"افعال مستقیم (بدون würde)",text:"sein → wäre | haben → hätte | können → könnte\nmüssen → müsste | dürfen → dürfte | werden → würde"},
+      {title:"جملات شرطی",text:"Wenn ich Zeit hätte, würde ich mehr lernen.\nWenn ich du wäre, würde ich das nicht tun."}
+    ],
+    examples:[{de:"Könnten Sie mir bitte helfen?",fa:"آیا می‌توانید کمکم کنید؟ (ادبانه)"},{de:"Ich wäre gerne Ärztin.",fa:"دوست داشتم دکتر باشم."},{de:"Wenn ich Geld hätte, würde ich reisen.",fa:"اگر پول داشتم سفر می‌کردم."}],
+    mistakes:[{wrong:"Wenn ich hätte Geld...",note:"❌ در جمله فرعی فعل آخر است: Wenn ich Geld hätte..."},{wrong:"Ich würde sein glücklich.",note:"❌ sein در Konjunktiv II مستقیم: Ich wäre glücklich."}],
+    tip:"Könnten Sie...? و Hätten Sie...? ادبانه‌ترین راه درخواست در آلمانی هستند!"},
+  10:{title:"Passiv",level:"B2",summary:"مجهول — وقتی فاعل مهم نیست یا نامشخص است",
+    rules:[
+      {title:"Vorgangspassiv (عمل)",text:"werden + Partizip II\nPräsens: Das Haus wird gebaut.\nPräteritum: Das Haus wurde gebaut.\nPerfekt: Das Haus ist gebaut worden."},
+      {title:"Zustandspassiv (نتیجه)",text:"sein + Partizip II — وضعیت بعد از عمل\nDas Haus ist gebaut. (ساخته شده است)\nDie Tür ist geschlossen."},
+      {title:"فاعل در Passiv",text:"با von + Dativ فاعل را بیان می‌کنیم:\nDas Buch wurde von ihr geschrieben."}
+    ],
+    examples:[{de:"Das Formular wird ausgefüllt.",fa:"فرم پر می‌شود."},{de:"Der Brief wurde gestern verschickt.",fa:"نامه دیروز فرستاده شد."},{de:"Die Aufgabe ist erledigt.",fa:"کار انجام شده است."}],
+    mistakes:[{wrong:"Das Haus wird gebaut worden.",note:"❌ Perfekt Passiv: ist gebaut worden (نه wird)"},{wrong:"Ich wurde von ihm geholfen.",note:"❌ helfen Dativ می‌گیرد: Mir wurde von ihm geholfen."}],
+    tip:"Vorgangspassiv = تأکید بر عمل (werden) | Zustandspassiv = تأکید بر نتیجه (sein)"},
+  11:{title:"Relativsätze",level:"B2",summary:"جملات وصفی — توصیف اسم با جمله فرعی",
+    rules:[
+      {title:"ضمایر نسبی",text:"جنس اسم اصلی ملاک است، نقش در جمله فرعی تصریف را مشخص می‌کند:\nNom: der/die/das/die\nAkk: den/die/das/die\nDat: dem/der/dem/denen\nGen: dessen/deren/dessen/deren"},
+      {title:"ساختار",text:"اسم + , + ضمیر نسبی + ... + فعل\nDas Buch, das ich lese, ist interessant.\nDer Mann, dem ich helfe, ist krank."}
+    ],
+    examples:[{de:"Die Frau, die ich kenne, ist Ärztin.",fa:"زنی که می‌شناسم دکتر است."},{de:"Das Haus, in dem ich wohne, ist alt.",fa:"خانه‌ای که در آن زندگی می‌کنم قدیمی است."},{de:"Der Mann, dessen Auto rot ist, heißt Peter.",fa:"مردی که ماشینش قرمز است Peter نام دارد."}],
+    mistakes:[{wrong:"Das Buch, das ich lese es...",note:"❌ ضمیر نسبی جایگزین ضمیر می‌شود — es اضافه است."},{wrong:"Die Frau, der ich helfe...",note:"✅ helfen + Dativ: Die Frau, der ich helfe (der = Dativ مؤنث) — درست است!"}],
+    tip:"ضمیر نسبی مثل der/die/das تصریف می‌شود فقط Genitiv و Dativ جمع فرق دارند."},
+  12:{title:"Infinitivkonstruktionen",level:"B2",summary:"ساختارهای مصدری — جایگزین جملات فرعی",
+    rules:[
+      {title:"um...zu (هدف)",text:"برای بیان هدف — معادل damit/weil\nIch lerne Deutsch, um in Deutschland zu arbeiten.\nفاعل هر دو جمله باید یکی باشد!"},
+      {title:"ohne...zu (بدون اینکه)",text:"Er ging, ohne etwas zu sagen.\nSie hat bestanden, ohne viel zu üben."},
+      {title:"anstatt...zu (به جای اینکه)",text:"Anstatt zu lernen, schaut er TV.\nSie arbeitet, anstatt sich auszuruhen."}
+    ],
+    examples:[{de:"Ich spare Geld, um eine Reise zu machen.",fa:"پول پس‌انداز می‌کنم تا سفر کنم."},{de:"Er kam, ohne anzuklopfen.",fa:"آمد بدون اینکه در بزند."},{de:"Anstatt zu schlafen, lernte sie.",fa:"به جای اینکه بخوابد، درس خواند."}],
+    mistakes:[{wrong:"Ich lerne, um ich Deutsch zu sprechen.",note:"❌ بعد از um فاعل نمی‌آید: Ich lerne, um Deutsch zu sprechen."},{wrong:"Er arbeitet, ohne dass er Pause macht. → ohne zu",note:"✅ اگر فاعل‌ها یکی باشند از ohne zu استفاده کن — ساده‌تر است."}],
+    tip:"فاعل هر دو جمله یکی است؟ → ohne/um/anstatt + zu + Infinitiv. فرق دارد؟ → ohne dass + جمله فرعی"},
+  13:{title:"Konnektoren (B2)",level:"B2",summary:"کلمات ربط پیشرفته برای نوشتن و صحبت رسمی",
+    rules:[
+      {title:"تضاد",text:"obwohl + جمله فرعی (فعل آخر)\ntrotzdem / dennoch + جمله اصلی\njedoch / allerdings (در میان جمله)"},
+      {title:"علت و نتیجه",text:"weil/da + جمله فرعی\ndeshalb/daher/darum + جمله اصلی\nfolglich/infolgedessen (رسمی‌تر)"},
+      {title:"افزودن و مقایسه",text:"außerdem / darüber hinaus (علاوه بر این)\neinerseits...andererseits (از یک طرف...از طرف دیگر)\nsowohl...als auch (هم...هم)"}
+    ],
+    examples:[{de:"Obwohl es schwer ist, gebe ich nicht auf.",fa:"اگرچه سخت است، تسلیم نمی‌شوم."},{de:"Er ist krank, deshalb kommt er nicht.",fa:"مریض است، بنابراین نمی‌آید."},{de:"Einerseits ist es teuer, andererseits sehr gut.",fa:"از یک طرف گران است، از طرف دیگر خیلی خوب."}],
+    mistakes:[{wrong:"Obwohl es schwer ist, aber...",note:"❌ بعد از obwohl نباید aber بیاید!"},{wrong:"Deshalb, er kommt nicht.",note:"❌ بعد از deshalb فعل می‌آید نه فاعل: Deshalb kommt er nicht."}],
+    tip:"deshalb/daher/darum/trotzdem → فعل بعد از آنها می‌آید (Position 1 هستند)!"},
+  14:{title:"Konjunktiv I",level:"C1",summary:"نقل قول غیرمستقیم — در روزنامه، گزارش و متون رسمی",
+    rules:[
+      {title:"کاربرد",text:"برای نقل قول غیرمستقیم — نشان می‌دهد که این کلام شخص دیگری است:\nDer Minister sagte, er sei krank. (= Er ist krank.)\nSie erklärte, sie habe keine Zeit."},
+      {title:"تصریف",text:"sein: sei, seist, sei, seien\nhaben: habe, habest, habe, haben\nاکثر افعال: Infinitiv-stamm + e (ohne Personalpräfix)\nkommen → er komme / gehen → er gehe"}
+    ],
+    examples:[{de:"Er sagte, er sei müde.",fa:"گفت که خسته است."},{de:"Die Zeitung berichtete, der Präsident habe das Gesetz unterzeichnet.",fa:"روزنامه گزارش داد که رئیس‌جمهور قانون را امضا کرده."},{de:"Sie erklärte, sie könne nicht kommen.",fa:"توضیح داد که نمی‌تواند بیاید."}],
+    mistakes:[{wrong:"Er sagte, dass er ist müde.",note:"در نقل قول غیرمستقیم رسمی از Konjunktiv I استفاده می‌شود، نه Indikativ."},{wrong:"Sie sagte, sie haben keine Zeit.",note:"Konjunktiv I: sie habe (نه haben — آن با Indikativ یکی می‌شود، پس Konjunktiv II: hätte)"}],
+    tip:"اگر Konjunktiv I با Indikativ یکی شد (wir kommen = wir kommen) → از Konjunktiv II استفاده کن!"},
+  15:{title:"Nominalisierung",level:"C1",summary:"اسم‌سازی — تبدیل فعل و صفت به اسم برای نوشتار رسمی",
+    rules:[
+      {title:"از فعل",text:"Infinitiv به عنوان اسم (خنثی):\ndas Lernen, das Arbeiten, das Schreiben\nیا با پسوند -ung (مؤنث):\ndie Lösung, die Entscheidung, die Entwicklung\nیا -nis/-heit/-keit/-schaft:\ndie Kenntnis, die Freiheit, die Möglichkeit"},
+      {title:"از صفت",text:"صفت‌ها با حرف بزرگ و حرف تعریف:\nder/die/das + صفت + e\nder Kranke, die Alte, das Gute\nدر مصدر: das Gute, das Schöne"}
+    ],
+    examples:[{de:"Die Entwicklung der Technologie ist beeindruckend.",fa:"توسعه‌ی فناوری چشمگیر است."},{de:"Das Lernen macht Spaß.",fa:"یادگیری جالب است."},{de:"Die Möglichkeit besteht, dass...",fa:"این امکان وجود دارد که..."}],
+    mistakes:[{wrong:"Die Lösung-en des Problems",note:"✅ Lösung در جمع: die Lösungen — درست است."},{wrong:"Das ist eine gute Entwicklung. → Nominalisierung: eine gute Entwicklung",note:"✅ صفت قبل از اسم با تصریف صحیح — درست است."}],
+    tip:"در C1 از اسم‌سازی استفاده کن تا نوشتارت رسمی‌تر و حرفه‌ای‌تر به نظر برسد!"},
+  16:{title:"Partizipialkonstruktionen",level:"C1",summary:"ساختارهای مشارکتی — جایگزین جملات وصفی و فرعی",
+    rules:[
+      {title:"Partizip I (فعل در جریان)",text:"Infinitiv + d → صفت\nschlafend, lachend, weinend, kommend\nDas schlafende Kind = Das Kind, das schläft."},
+      {title:"Partizip II (فعل تمام‌شده/مجهول)",text:"Partizip II → صفت\nDas geschriebene Buch = Das Buch, das geschrieben wurde.\nDie gelöste Aufgabe = Die Aufgabe, die gelöst wurde."},
+      {title:"گسترش",text:"می‌توان قبل از Partizip توضیحات اضافه کرد:\nDie von ihr verfasste Studie...\nDas seit Jahren bestehende Problem..."}
+    ],
+    examples:[{de:"Das weinende Kind sucht seine Mutter.",fa:"بچه‌ای که گریه می‌کند دنبال مادرش می‌گردد."},{de:"Das gelöste Problem erleichtert die Arbeit.",fa:"مشکل حل‌شده کار را آسان می‌کند."},{de:"Die im Labor durchgeführten Experimente...",fa:"آزمایش‌هایی که در آزمایشگاه انجام شدند..."}],
+    mistakes:[{wrong:"Das geschlafene Kind",note:"❌ schlafen Partizip I: das schlafende Kind (نه geschlafen — آن Partizip II است)"},{wrong:"Die lösende Aufgabe",note:"❌ برای معنی مجهول از Partizip II استفاده کن: die gelöste Aufgabe"}],
+    tip:"Partizip I = همزمان با فعل اصلی | Partizip II = قبل از فعل اصلی یا مجهول"},
+  17:{title:"Stilmittel und Textkohärenz",level:"C2",summary:"ابزارهای سبکی و انسجام متن — برای نوشتار حرفه‌ای C2",
+    rules:[
+      {title:"ابزارهای انسجام",text:"ارجاع: dieser/jener/solch- به جای تکرار\nرابط‌های متنی: zunächst, im Anschluss daran, abschließend\nتقابل: im Gegensatz dazu, wohingegen, während"},
+      {title:"سبک رسمی",text:"Passiv برای بی‌طرفی\nNominalisierung برای فشردگی\nاجتناب از ich در متن علمی\nاستفاده از man یا Passiv"}
+    ],
+    examples:[{de:"Zunächst ist festzustellen, dass...",fa:"در ابتدا باید گفت که..."},{de:"Im Gegensatz dazu steht die Ansicht, dass...",fa:"در مقابل این دیدگاه وجود دارد که..."},{de:"Es lässt sich schlussfolgern, dass...",fa:"می‌توان نتیجه گرفت که..."}],
+    mistakes:[{wrong:"Ich denke, dass... (در متن علمی)",note:"در نوشتار C2 از: Es ist anzunehmen, dass... / Die Analyse zeigt, dass... استفاده کن"},{wrong:"sehr gut, sehr interessant",note:"در C2 از adjektiv‌های دقیق‌تر استفاده کن: hervorragend, bemerkenswert, außerordentlich"}],
+    tip:"C2 = دقت در انتخاب کلمه + انسجام متن + سبک متناسب با موقعیت. کیفیت مهم‌تر از کمیت است!"}
+};
+
+function askGrammar(){
+  const q = document.getElementById('grammar-input').value.trim().toLowerCase();
+  if(!q){toast('❗ موضوع را بنویس');return;}
+  
+  // جستجو در دیتابیس
+  let found = null;
+  const keys = Object.keys(GRAMMAR_DB);
+  for(let k of keys){
+    const g = GRAMMAR_DB[k];
+    const searchIn = (g.title+' '+g.summary+' '+g.level).toLowerCase();
+    const qWords = q.split(' ');
+    if(qWords.some(w => w.length>2 && searchIn.includes(w))){
+      found = {idx:k, ...g};
+      break;
+    }
+  }
+  
+  // اگر پیدا نشد، اولین چیپ مرتبط را نشان بده
+  if(!found){
+    document.getElementById('grammar-result').innerHTML=`
+      <div style="background:rgba(247,129,102,0.1);border:1px solid rgba(247,129,102,0.3);border-radius:12px;padding:16px;direction:rtl;text-align:center;">
+        <div style="font-size:20px;margin-bottom:8px;">🔍</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:6px;">نتیجه‌ای پیدا نشد</div>
+        <div style="font-size:12px;color:var(--muted);">از چیپ‌های بالا موضوع را انتخاب کن</div>
+      </div>`;
+    return;
+  }
+  showGrammarCard(found);
+}
+
+function showGrammarCard(g){
+  const resultEl = document.getElementById('grammar-result');
+  const safeG = JSON.stringify(g).replace(/'/g,"\\'");
+  resultEl.innerHTML = `
+    <div class="grammar-card" style="border-color:rgba(88,166,255,0.3);margin-bottom:12px;">
+      <div style="padding:14px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="grammar-name">${g.title}</div>
+            <div class="grammar-fa">${g.summary}</div>
+          </div>
+          <span style="font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(88,166,255,0.15);color:var(--accent);border:1px solid rgba(88,166,255,0.3);">${g.level}</span>
+        </div>
+      </div>
+      <div class="grammar-body" style="display:block;">
+        ${g.rules.map(r=>`
+          <div class="rule-box">
+            <div class="rule-title">${r.title}</div>
+            <div class="rule-text">${r.text.replace(/\n/g,'<br/>')}</div>
+          </div>`).join('')}
+        ${g.examples.map(ex=>`
+          <div class="example-row">
+            <div class="ex-de">✅ ${ex.de}</div>
+            <div class="ex-fa">${ex.fa}</div>
+          </div>`).join('')}
+        ${g.mistakes.map(m=>`
+          <div class="wrong-row">
+            <div class="ex-wrong">❌ ${m.wrong}</div>
+            <div style="font-size:11px;color:var(--muted);direction:rtl;margin-top:3px;">⚠️ ${m.note}</div>
+          </div>`).join('')}
+        <div style="background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.25);border-radius:8px;padding:10px;margin-top:8px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💡 نکته طلایی</div>
+          <div style="font-size:12px;color:var(--text);direction:rtl;line-height:1.6;">${g.tip}</div>
+        </div>
+        <button onclick='saveGrammarItem(${JSON.stringify(g).replace(/\\/g,"\\\\").replace(/'/g,"\\'")})' 
+          style="margin-top:10px;padding:7px 14px;border-radius:8px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);color:var(--green);font-size:12px;cursor:pointer;font-family:'Vazirmatn',sans-serif;direction:rtl;">
+          📌 ذخیره
+        </button>
+      </div>
+    </div>`;
+}
+
+function saveGrammarItem(g){
+  if(grammarSaved.find(x=>x.title===g.title)){toast('قبلاً ذخیره شده!');return;}
+  grammarSaved.unshift({...g, savedAt:Date.now()});
+  localStorage.setItem('dm_grammar_saved',JSON.stringify(grammarSaved));
+  renderGrammarSaved();
+  toast('📌 ذخیره شد!');
+}
+
+function saveGrammar(p){
+  if(grammarSaved.find(g=>g.title===p.title)){toast('قبلاً ذخیره شده!');return;}
+  grammarSaved.unshift({...p, savedAt: Date.now()});
+  localStorage.setItem('dm_grammar_saved', JSON.stringify(grammarSaved));
+  renderGrammarSaved();
+  toast('📌 ذخیره شد!');
+}
+
+function renderGrammarSaved(){
+  const sec = document.getElementById('grammar-saved-section');
+  const list = document.getElementById('grammar-saved-list');
+  if(!grammarSaved.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML = grammarSaved.map((g,i)=>`
+    <div class="grammar-card" id="gs-${i}">
+      <div class="grammar-header" onclick="toggleGS(${i})" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="grammar-name">${g.title}</div>
+          <div class="grammar-fa">${g.summary||''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:10px;color:var(--accent);">${g.level||''}</span>
+          <span class="grammar-arrow">›</span>
+        </div>
+      </div>
+      <div class="grammar-body">
+        ${(g.rules||[]).map(r=>`
+          <div class="rule-box">
+            <div class="rule-title">${r.title}</div>
+            <div class="rule-text">${(r.text||'').replace(/\n/g,'<br/>')}</div>
+          </div>`).join('')}
+        ${(g.examples||[]).map(ex=>`
+          <div class="example-row">
+            <div class="ex-de">✅ ${ex.de}</div>
+            <div class="ex-fa">${ex.fa}</div>
+          </div>`).join('')}
+        ${g.tip?`<div style="background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.25);border-radius:8px;padding:10px;margin-top:6px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💡 نکته طلایی</div>
+          <div style="font-size:12px;color:var(--text);direction:rtl;line-height:1.6;">${g.tip}</div>
+        </div>`:''}
+        <button onclick="deleteGrammar(${i})" style="margin-top:8px;padding:5px 12px;border-radius:8px;background:rgba(247,129,102,0.1);border:1px solid rgba(247,129,102,0.3);color:var(--accent2);font-size:11px;cursor:pointer;font-family:'Vazirmatn',sans-serif;">
+          🗑 حذف
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleGS(i){document.getElementById('gs-'+i)?.classList.toggle('open');}
+function deleteGrammar(i){
+  grammarSaved.splice(i,1);
+  localStorage.setItem('dm_grammar_saved',JSON.stringify(grammarSaved));
+  renderGrammarSaved();
+  toast('🗑 حذف شد');
+}
+
+// ══════════════ TOAST ══════════════
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  if(toastTimer) clearTimeout(toastTimer);
+  el.classList.remove('show');
+  el.textContent = msg;
+  void el.offsetWidth;
+  el.classList.add('show');
+  toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, 2500);
+}
+
+// ══════════════ PWA ══════════════
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-bar').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click',()=>{
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{
+    deferredPrompt=null;document.getElementById('install-bar').classList.remove('show');
+  });}
+});
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// ══════════════ INIT ══════════════
+renderNotes();
+</script>
+</body>
+</html>
